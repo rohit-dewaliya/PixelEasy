@@ -3,6 +3,7 @@ import pygame
 from pygame.locals import *
 from data.scripts.image_functions import scale_image_size
 from data.scripts.color_palette_manager import ColorPaletteManager
+from data.scripts.menu_manager import MenuManager
 
 pygame.init()
 
@@ -15,6 +16,7 @@ class Game:
 
         self.CLOCK = pygame.time.Clock()
         self.FPS = 30
+
 
         self.run = True
 
@@ -42,37 +44,44 @@ class Game:
         self.FRAME_DISPLAY = pygame.Surface(self.FRAME_SIZE)
         self.CANVAS_DISPLAY = pygame.Surface(self.CANVAS_SIZE)
 
-        self.color_palette_manager = (ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
-                                      self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS))
+        self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
+                                      self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
+        self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS)
 
     def main(self):
-        while self.run:
-            mouse_pos = pygame.mouse.get_pos()
+        try:
+            while self.run:
+                mouse_pos = pygame.mouse.get_pos()
 
-            self.SCREEN.fill((255, 255, 255))
-            self.COLOR_PALETTE_DISPLAY.fill((0, 0, 0))
-            self.COLOR_PALETTE_COLORS_DISPLAY.fill((0, 0, 0))
-            self.MENU_DISPLAY.fill((0, 0, 0))
-            self.FRAME_DISPLAY.fill((0, 0, 0))
-            self.CANVAS_DISPLAY.fill((0, 0, 0))
+                self.SCREEN.fill((255, 255, 255))
+                self.COLOR_PALETTE_DISPLAY.fill((0, 0, 0))
+                self.COLOR_PALETTE_COLORS_DISPLAY.fill((0, 0, 0))
+                self.MENU_DISPLAY.fill((0, 0, 0))
+                self.FRAME_DISPLAY.fill((0, 0, 0))
+                self.CANVAS_DISPLAY.fill((0, 0, 0))
 
-            self.color_palette_manager.display_color_paletter(mouse_pos)
+                self.color_palette_manager.display_color_paletter(mouse_pos)
+                self.menu_manager.display_buttons(mouse_pos)
 
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    self.run = False
-                elif event.type == VIDEORESIZE:
-                    self.screen_size(list(event.size))
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        self.run = False
+                    elif event.type == VIDEORESIZE:
+                        self.screen_size(list(event.size))
 
-            self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE), self.COLOR_PALETTE_POS)
-            self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_COLORS_DISPLAY, *self.COLOR_PALETTE_COLORS_SIZE),
-                             self.COLOR_PALETTE_COLORS_POS)
-            self.SCREEN.blit(scale_image_size(self.MENU_DISPLAY, *self.MENU_SIZE), self.MENU_POS)
-            self.SCREEN.blit(scale_image_size(self.FRAME_DISPLAY, *self.FRAME_SIZE), self.FRAME_POS)
-            self.SCREEN.blit(scale_image_size(self.CANVAS_DISPLAY, *self.CANVAS_SIZE), self.CANVAS_POS)
+                self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE), self.COLOR_PALETTE_POS)
+                self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_COLORS_DISPLAY, *self.COLOR_PALETTE_COLORS_SIZE),
+                                 self.COLOR_PALETTE_COLORS_POS)
+                self.SCREEN.blit(scale_image_size(self.MENU_DISPLAY, *self.MENU_SIZE), self.MENU_POS)
+                self.SCREEN.blit(scale_image_size(self.FRAME_DISPLAY, *self.FRAME_SIZE), self.FRAME_POS)
+                self.SCREEN.blit(scale_image_size(self.CANVAS_DISPLAY, *self.CANVAS_SIZE), self.CANVAS_POS)
 
-            pygame.display.update()
-            self.CLOCK.tick(self.FPS)
+                pygame.display.flip()
+                self.CLOCK.tick(self.FPS)
+        except KeyboardInterrupt:
+            print("Game interrupted by user.")
+        finally:
+            pygame.quit()
 
 if __name__ == "__main__":
     game = Game()
