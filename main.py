@@ -1,7 +1,7 @@
 import pygame
 
 from pygame.locals import *
-from data.scripts.image_functions import scale_image_size
+from data.scripts.image_functions import scale_image_size, load_image
 from data.scripts.color_palette_manager import ColorPaletteManager
 from data.scripts.menu_manager import MenuManager
 
@@ -12,6 +12,7 @@ class Game:
     def __init__(self):
         self.MIN_SCREEN_SIZE = [800, 600]
         self.screen_size([1300, 800])
+        pygame.display.set_icon(load_image('icon.ico').convert())
         pygame.display.set_caption("PixelEasy")
 
         self.CLOCK = pygame.time.Clock()
@@ -46,7 +47,7 @@ class Game:
 
         self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
                                       self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
-        self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS)
+        self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
 
     def main(self):
         try:
