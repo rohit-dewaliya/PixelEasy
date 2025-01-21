@@ -4,6 +4,7 @@ from pygame.locals import *
 from data.scripts.image_functions import scale_image_size, load_image
 from data.scripts.color_palette_manager import ColorPaletteManager
 from data.scripts.menu_manager import MenuManager
+from data.scripts.canvas_manager import CanvasManager
 
 pygame.init()
 
@@ -17,7 +18,6 @@ class Game:
 
         self.CLOCK = pygame.time.Clock()
         self.FPS = 30
-
 
         self.run = True
 
@@ -48,6 +48,7 @@ class Game:
         self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
                                       self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
         self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
+        self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS)
 
     def main(self):
         try:
@@ -62,6 +63,7 @@ class Game:
                 self.CANVAS_DISPLAY.fill((0, 0, 0))
 
                 self.color_palette_manager.display_color_paletter(mouse_pos)
+                self.canvas_manager.display_surface(mouse_pos)
                 self.menu_manager.display_buttons(mouse_pos)
 
                 for event in pygame.event.get():

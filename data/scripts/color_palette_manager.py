@@ -119,7 +119,7 @@ class ColorPaletteManager:
         if (self.color_palette_display_pos[0] < mouse_pos[0] < self.color_palette_display_pos[0] +
                 self.color_palette_display.get_width() and self.color_palette_display_pos[1] < mouse_pos[1] <
                 self.color_palette_display_pos[1] + self.color_palette_display.get_height()):
-
+            global event
             event = pygame.event.get()
             if event and event[0].type == pygame.MOUSEBUTTONDOWN:
                     if event[0].button == 4:
@@ -131,20 +131,25 @@ class ColorPaletteManager:
         for color, pos in list(self.color_palette.items()):
             if (pos[0] < mouse_pos[0] < pos[0] + 50 and pos[1] + self.scroll_y < mouse_pos[1] < pos[1] + 50 +
                     self.scroll_y):
-                pygame.draw.rect(self.color_palette_display, (255, 255, 255), (pos[0], pos[1] + self.scroll_y, 50, 50))
-                if pygame.mouse.get_pressed(5)[0]:
-                    if self.selected_color:
-                        self.background_color = color
-                    else:
-                        self.foreground_color = color
+                if (self.color_palette_display_pos[0] < mouse_pos[0] < self.color_palette_display_pos[0] +
+                        self.color_palette_display.get_width() and self.color_palette_display_pos[1] - 60 <
+                        mouse_pos[1] < self.color_palette_display_pos[1] - 60 +
+                        self.color_palette_display.get_height()):
+                    pygame.draw.rect(self.color_palette_display, (255, 255, 255), (pos[0], pos[1] + self.scroll_y, 50, 50))
+                    if event and event[0].type == pygame.MOUSEBUTTONDOWN and event[0].button == 1:
+                        if self.selected_color:
+                            self.background_color = color
+                        else:
+                            self.foreground_color = color
             pygame.draw.rect(self.color_palette_display, color, (pos[0] + 2, pos[1] + 2 + self.scroll_y, 46, 46))
 
             if (pos[0] + 29 < mouse_pos[0] < pos[0] + 29 + self.minus_button_bg.get_width() and
                     pos[1] + 3  + self.scroll_y < mouse_pos[1] < pos[1] + 3 + self.minus_button_bg.get_height() +
                     self.scroll_y):
                 self.color_palette_display.blit(self.minus_button_hover_bg, (pos[0] + 29, pos[1] + 3 + self.scroll_y))
-                if event and event[0].type == pygame.MOUSEBUTTONDOWN:
+                if event and event[0].type == pygame.MOUSEBUTTONDOWN and event[0].button == 1:
                     del self.color_palette[color]
+                    pygame.mouse.get_rel()
             self.color_palette_display.blit(self.minus_button_bg, (pos[0] + 29, pos[1] + 3 + self.scroll_y))
             self.color_palette_display.blit(self.minus_button, (pos[0] + 32, pos[1] + 5 + self.scroll_y))
 
