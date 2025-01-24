@@ -35,6 +35,7 @@ class ColorPaletteManager:
         self.color_palette = {}
         self.color_palette_color_size = 50
         self.scroll_y = 0
+        self.previous_color = self.background_color
 
     def color_chooser(self):
         self.color_choosen = colorchooser.askcolor(title="Choose Color")
@@ -138,6 +139,10 @@ class ColorPaletteManager:
                     pygame.draw.rect(self.color_palette_display, (255, 255, 255), (pos[0], pos[1] + self.scroll_y, 50, 50))
                     if event and event[0].type == pygame.MOUSEBUTTONDOWN and event[0].button == 1:
                         if self.selected_color:
+                            if not self.previous_color:
+                                self.previous_color = (255, 0, 0)
+                            else:
+                                self.previous_color = self.background_color
                             self.background_color = color
                         else:
                             self.foreground_color = color
@@ -150,6 +155,8 @@ class ColorPaletteManager:
                 if event and event[0].type == pygame.MOUSEBUTTONDOWN and event[0].button == 1:
                     del self.color_palette[color]
                     pygame.mouse.get_rel()
+                    if self.selected_color:
+                        self.background_color = self.previous_color
             self.color_palette_display.blit(self.minus_button_bg, (pos[0] + 29, pos[1] + 3 + self.scroll_y))
             self.color_palette_display.blit(self.minus_button, (pos[0] + 32, pos[1] + 5 + self.scroll_y))
 
