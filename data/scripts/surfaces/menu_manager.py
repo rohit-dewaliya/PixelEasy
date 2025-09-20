@@ -43,8 +43,9 @@ class MenuManager:
             y += size[1] + self.offset
 
     def display_buttons(self, mouse_pos, events):
-        if self.display_pos[0] < mouse_pos[0] < self.display_pos[0] + self.display.get_width() and self.display_pos[
-            1] < mouse_pos[1] < self.display_pos[1] + self.display.get_height():
+        _hover = self.display_pos[0] < mouse_pos[0] < self.display_pos[0] + self.display.get_width() and self.display_pos[
+            1] < mouse_pos[1] < self.display_pos[1] + self.display.get_height()
+        if _hover:
 
             for e in events:
                 if e.type == pygame.MOUSEBUTTONDOWN:
@@ -55,4 +56,4 @@ class MenuManager:
 
         pos = [mouse_pos[0] - self.display_pos[0], mouse_pos[1] - self.display_pos[1]]
         for index, button in enumerate(self.menu_buttons.items()):
-            button[1].display(self.display, self.canvas_screen, pos, events, self.scroll)
+            button[1].display(self.display, _hover, self.canvas_screen, pos, events, self.scroll)

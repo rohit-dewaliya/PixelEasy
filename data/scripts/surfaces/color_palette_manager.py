@@ -1,4 +1,5 @@
 import pygame
+from pygame import display
 
 from data.scripts.surfaces.color_palette_colors_manager import ColorPaletteColorsManager
 from data.scripts.ui.button import *
@@ -31,6 +32,7 @@ class ColorPaletteManager:
         # Background and Foreground Button---------#
         self.color_buttons = [(255, 0, 0), (255, 255, 255)]
         self.create_select_color_buttons()
+        self.selected_color_button = self.select_color_buttons[0]
 
     def reset_displays(self, display, display_pos, colors_palette, color_palette_pos):
         self.display = display
@@ -65,7 +67,7 @@ class ColorPaletteManager:
             y -= button_height
 
     def add_color_to_palette(self):
-        self.color_palette_color_manager.add_color(self.select_color_buttons[0].color)
+        self.color_palette_color_manager.add_color(self.selected_color_button.color)
 
     def display_text_buttons(self, mouse_pos, events, scroll = (0, 0)):
         for button in self.text_buttons:
@@ -81,11 +83,18 @@ class ColorPaletteManager:
     def display_select_color_button(self, mouse_pos, events, scroll = (0, 0)):
         for button in self.select_color_buttons:
             if button.display(self.display, mouse_pos, events, scroll):
-                button.color = self.color_chooser()
+                try:
+                    color = self.color_chooser()
+                    if color is not None:
+                        button.color = color
+                    self.selected_color_button = button
+                except:
+                    pass
+        pygame.draw.rect(self.display, (255, 255, 255), self.selected_color_button.rect, 3)
 
     def display_buttons(self, mouse_pos, events, scroll = (0, 0)):
         self.display_text_buttons(mouse_pos, events, scroll)
         self.display_add_color_button(mouse_pos, events, scroll)
         self.display_select_color_button(mouse_pos, events, scroll)
 
-        self.color_palette_color_manager.display_buttons(mouse_pos, events, scroll)
+        self.color_palette_color_manager.display_buttons(mouse_pos, events, self.selected_color_button, scroll)

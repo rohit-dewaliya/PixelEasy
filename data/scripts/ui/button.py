@@ -119,8 +119,8 @@ class IconButton(Button):
         self.tooltip_bg = scale_image_size(background, *self.tooltip_size)
         self.border_image = add_border(self.image)
 
-    def display(self, display, tooltip_display, mouse_pos, events, scroll=(0, 0)):
-        if self.hover(mouse_pos, scroll):
+    def display(self, display, surface_hover, tooltip_display, mouse_pos, events, scroll=(0, 0)):
+        if self.hover(mouse_pos, scroll) and surface_hover:
             if self.click(mouse_pos, events, scroll):
                 print(self.image_name)
             display.blit(self.bg_hover, [self.x - scroll[0], self.y - scroll[1], self.width, self.height])
@@ -146,10 +146,10 @@ class ColorIconButton(Button):
         self.text_bg = scale_image_size(background, self.width, self.height)
         self.text_bg_hover = scale_image_size(background_hover, self.width, self.height)
 
-    def display(self, display, mouse_pos, events, scroll=(0, 0)):
+    def display(self, display, surface_hover, mouse_pos, events, scroll=(0, 0)):
         clicked = False
         mouse_pos = [mouse_pos[0] - self.offset[0], mouse_pos[1] - self.offset[1]]
-        if self.hover(mouse_pos, scroll):
+        if self.hover(mouse_pos, scroll) and surface_hover:
             if self.click(mouse_pos, events, scroll):
                 clicked = True
             display.blit(self.text_bg_hover, (self.x - scroll[0], self.y - scroll[1]))

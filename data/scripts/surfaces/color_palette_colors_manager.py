@@ -12,7 +12,7 @@ class ColorPaletteColorsManager:
         self.display_size = display_size
 
         self.color_palette = {}
-        self.color_palette_colors = []
+        self.selected_color = None
         self.button_size = [50, 50]
         self.color_size = color_size
         self.scroll = [0, 0]
@@ -69,10 +69,10 @@ class ColorPaletteColorsManager:
         if color in self.color_palette:
             del self.color_palette[color]
 
-    def display_buttons(self, mouse_pos, events, scroll=(0, 0)):
-        if self.display_pos[0] < mouse_pos[0] < self.display_pos[0] + self.display.get_width() and self.display_pos[
-            1] < mouse_pos[1] < self.display_pos[1] + self.display.get_height():
-
+    def display_buttons(self, mouse_pos, events, selected_button, scroll = (0, 0)):
+        _hover = self.display_pos[0] < mouse_pos[0] < self.display_pos[0] + self.display.get_width() and self.display_pos[
+            1] < mouse_pos[1] < self.display_pos[1] + self.display.get_height()
+        if _hover:
             for e in events:
                 if e.type == pygame.MOUSEBUTTONDOWN:
                     if e.button == 4 and self.scroll[1] < self.min_scroll:
@@ -80,6 +80,11 @@ class ColorPaletteColorsManager:
                     elif e.button == 5 and self.scroll[1] > 0:
                         self.scroll[1] -= 20
 
-        pos = [mouse_pos[0] - self.display_pos[0], mouse_pos[1] - self.display_pos[1]]
         for color, button in self.color_palette.items():
-            button.display(self.display, mouse_pos, events, self.scroll)
+            if button.display(self.display, _hover, mouse_pos, events, self.scroll) and _hover:
+                self.selected_color = color
+                selected_button.color = color
+
+            if self.selected_color == color:
+                pygame.draw.rect(self.display, (255, 255, 255), (button.x - self.scroll[0], button.y - self.scroll[1],
+                                                                 button.width, button.height), 5)
