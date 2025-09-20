@@ -1,6 +1,6 @@
 import pygame
 
-from data.scripts.image_functions import load_image, scale_image_size
+from data.scripts.tools.image_functions import load_image, scale_image_size
 
 
 class CanvasManager:
@@ -18,12 +18,6 @@ class CanvasManager:
         self.change_pos = False
 
     def find_mouse_pos(self, mouse_pos):
-        # mouse_pos = [mouse_pos[0] - self.display_pos[0], mouse_pos[1] - self.display_pos[1]]
-        #
-        # if (self.surface_pos[0] + self.display_pos[0] <= mouse_pos[0] <= self.surface_pos[0] + self.display_pos[0] + self.surface_size[0] *
-        #         self.scale_size and self.surface_pos[1] + self.display_pos[1] <= mouse_pos[1] <= self.surface_pos[1]
-        #         + self.display_pos[1] + self.surface_size[1] * self.scale_size):
-
         x = int((mouse_pos[0] - (self.surface_pos[0] + self.display_pos[0])) // self.scale_size)
         y = int((mouse_pos[1] - (self.surface_pos[1] + self.display_pos[1])) // self.scale_size)
         return x, y

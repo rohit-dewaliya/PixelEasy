@@ -1,5 +1,4 @@
-import pygame
-from data.scripts.image_functions import load_image, swap_color, scale_image_ratio, clip_surface
+from data.scripts.tools.image_functions import load_image, swap_color, scale_image_ratio, clip_surface
 
 class Font():
     def __init__(self, path, color = (255, 0, 0), size_ratio = 1):

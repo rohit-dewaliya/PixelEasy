@@ -1,10 +1,9 @@
 import pygame
 
 from pygame.locals import *
-from data.scripts.image_functions import scale_image_size, load_image
-from data.scripts.color_palette_manager import ColorPaletteManager
-from data.scripts.menu_manager import MenuManager
-from data.scripts.canvas_manager import CanvasManager
+from data.scripts.tools.image_functions import scale_image_size, load_image
+from data.scripts.surfaces.color_palette_manager import ColorPaletteManager
+from data.scripts.surfaces.menu_manager import MenuManager
 
 pygame.init()
 
@@ -12,8 +11,11 @@ pygame.init()
 class Game:
     def __init__(self):
         self.MIN_SCREEN_SIZE = [800, 600]
+        self.color_palette_manager = None
+        self.menu_manager = None
+
         self.screen_size([1300, 800])
-        pygame.display.set_icon(load_image('icon.ico').convert())
+        pygame.display.set_icon(load_image('design.png'))
         pygame.display.set_caption("PixelEasy")
 
         self.CLOCK = pygame.time.Clock()
@@ -45,10 +47,17 @@ class Game:
         self.FRAME_DISPLAY = pygame.Surface(self.FRAME_SIZE)
         self.CANVAS_DISPLAY = pygame.Surface(self.CANVAS_SIZE)
 
-        self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
-                                      self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
-        self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
-        self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS)
+        if not self.color_palette_manager:
+            self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
+                                                  self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
+        else:
+            self.color_palette_manager.reset_displays(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
+                                                      self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
+
+        if not self.menu_manager:
+            self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
+        else:
+            self.menu_manager.reset_displays(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
 
     def main(self):
         try:
@@ -62,11 +71,12 @@ class Game:
                 self.FRAME_DISPLAY.fill((0, 0, 0))
                 self.CANVAS_DISPLAY.fill((0, 0, 0))
 
-                self.color_palette_manager.display_color_paletter(mouse_pos)
-                self.canvas_manager.display_surface(mouse_pos)
-                self.menu_manager.display_buttons(mouse_pos)
+                events = pygame.event.get()
 
-                for event in pygame.event.get():
+                self.color_palette_manager.display_buttons(mouse_pos, events)
+                self.menu_manager.display_buttons(mouse_pos, events)
+
+                for event in events:
                     if event.type == QUIT:
                         self.run = False
                     elif event.type == VIDEORESIZE:
@@ -75,9 +85,9 @@ class Game:
                 self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE), self.COLOR_PALETTE_POS)
                 self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_COLORS_DISPLAY, *self.COLOR_PALETTE_COLORS_SIZE),
                                  self.COLOR_PALETTE_COLORS_POS)
-                self.SCREEN.blit(scale_image_size(self.MENU_DISPLAY, *self.MENU_SIZE), self.MENU_POS)
                 self.SCREEN.blit(scale_image_size(self.FRAME_DISPLAY, *self.FRAME_SIZE), self.FRAME_POS)
                 self.SCREEN.blit(scale_image_size(self.CANVAS_DISPLAY, *self.CANVAS_SIZE), self.CANVAS_POS)
+                self.SCREEN.blit(scale_image_size(self.MENU_DISPLAY, *self.MENU_SIZE), self.MENU_POS)
 
                 pygame.display.flip()
                 self.CLOCK.tick(self.FPS)
