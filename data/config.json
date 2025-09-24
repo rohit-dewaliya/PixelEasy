@@ -1,4 +1,9 @@
 {
+  "cursor_theme": {
+    "type": "dropdown",
+    "options": ["dark", "light"],
+    "value": "dark"
+  },
   "screen_color": {
     "type": "color",
     "value": [255, 255, 255]
@@ -26,11 +31,6 @@
   "menu_background_color": {
     "type": "color",
     "value": [0, 0, 0]
-  },
-  "cursor_theme": {
-    "type": "dropdown",
-    "options": ["dark", "light"],
-    "value": "dark"
   },
   "button_text_color": {
     "type": "color",

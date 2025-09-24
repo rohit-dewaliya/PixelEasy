@@ -1,81 +1,82 @@
 import pygame
 
-class RadioButton:
-    def __init__(self, x, y, radius, label, font, selected=False,
-                 circle_color=(200, 200, 200), fill_color=(50, 150, 250), text_color=(255, 255, 255)):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.label = label
-        self.font = font
-        self.circle_color = circle_color
-        self.fill_color = fill_color
+from data.scripts.tools.font import Font
+
+dropdown_text = Font('small_font.png', (255, 255, 255), 3)
+
+
+class Dropdown:
+    def __init__(self, x, y, width, height, options, selected_index=0,
+                 bg_color=(50, 50, 50), text_color=(255, 255, 255),
+                 hover_color=(70, 70, 70), border_color=(200, 200, 200)):
+        self.rect = pygame.Rect(x - width // 2, y, width, height)
+        self.options = options
+        self.selected_index = selected_index
+        self.bg_color = bg_color
         self.text_color = text_color
-        self.selected = selected
+        self.hover_color = hover_color
+        self.border_color = border_color
+        self.text_height = dropdown_text.image_height
 
-    def draw(self, surface, scroll=(0,0)):
-        # Outer circle
-        pygame.draw.circle(surface, self.circle_color,
-                           (self.x - scroll[0], self.y - scroll[1]), self.radius, 2)
-        # Inner filled circle if selected
-        if self.selected:
-            pygame.draw.circle(surface, self.fill_color,
-                               (self.x - scroll[0], self.y - scroll[1]), self.radius - 4)
+        self.open = False
+        self.option_rects = [pygame.Rect(x - width // 2, y + (i + 1) * height, width, height)
+                             for i in range(len(options))]
 
-        # Draw label
-        text_surface = self.font.render(self.label, True, self.text_color)
-        surface.blit(text_surface,
-                     (self.x + self.radius + 10 - scroll[0],
-                      self.y - text_surface.get_height() // 2 - scroll[1]))
+    def draw(self, surface, scroll=[0, 0]):
+        # Draw main rectangle
+        main_rect = self.rect.move(-scroll[0], -scroll[1])
+        pygame.draw.rect(surface, self.bg_color, main_rect)
+        pygame.draw.rect(surface, self.border_color, main_rect, 2)
 
-    def handle_event(self, mouse_pos, event, scroll=(0,0)):
+        # Draw selected text
+        dropdown_text.display_fonts(
+            surface,
+            str(self.options[self.selected_index]),
+            [main_rect.x + 5, main_rect.y + (main_rect.height - self.text_height)//2]
+        )
+
+        # Draw options if open
+        if self.open:
+            for i, option in enumerate(self.options):
+                rect = self.option_rects[i].move(-scroll[0], -scroll[1])
+                if rect.collidepoint(pygame.mouse.get_pos()):
+                    pygame.draw.rect(surface, self.hover_color, rect)
+                else:
+                    pygame.draw.rect(surface, self.bg_color, rect)
+                pygame.draw.rect(surface, self.border_color, rect, 2)
+
+                dropdown_text.display_fonts(
+                    surface,
+                    option,
+                    [rect.x + 5, rect.y + (rect.height - self.text_height)//2]
+                )
+
+    def handle_event(self, mouse_pos, event, scroll=[0, 0]):
         mx, my = mouse_pos
-        adj_x, adj_y = self.x - scroll[0], self.y - scroll[1]
+        adj_main = self.rect.move(-scroll[0], -scroll[1])
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            dx, dy = mx - adj_x, my - adj_y
-            if dx*dx + dy*dy <= self.radius*self.radius:
-                return True
-        return False
+            # Toggle dropdown
+            if adj_main.collidepoint(mx, my):
+                self.open = not self.open
+                return None
 
-
-class RadioButtonGroup:
-    def __init__(self, options, x, y, spacing, radius, font,
-                 circle_color=(200,200,200), fill_color=(50,150,250), text_color=(255,255,255)):
-        self.buttons = []
-        for i, label in enumerate(options):
-            self.buttons.append(RadioButton(x, y + i*spacing, radius, label, font,
-                                            selected=(i==0), # First one selected by default
-                                            circle_color=circle_color,
-                                            fill_color=fill_color,
-                                            text_color=text_color))
-
-    def draw(self, surface, scroll=(0,0)):
-        for btn in self.buttons:
-            btn.draw(surface, scroll)
-
-    def handle_event(self, mouse_pos, event, scroll=(0,0)):
-        for i, btn in enumerate(self.buttons):
-            if btn.handle_event(mouse_pos, event, scroll):
-                # Deselect all others
-                for b in self.buttons:
-                    b.selected = False
-                btn.selected = True
-                return i  # return selected index
+            # Check options if open
+            if self.open:
+                for i, rect in enumerate(self.option_rects):
+                    adj_rect = rect.move(-scroll[0], -scroll[1])
+                    if adj_rect.collidepoint(mx, my):
+                        self.selected_index = i
+                        self.open = False
+                        return i
+                self.open = False
         return None
 
-    def get_selected(self):
-        for i, btn in enumerate(self.buttons):
-            if btn.selected:
-                return i, btn.label
-        return None, None
 
 pygame.init()
 screen = pygame.display.set_mode((600,400))
-font = pygame.font.SysFont(None, 28)
-
-radio_group = RadioButtonGroup(["Option 1", "Option 2", "Option 3"],
-                               x=100, y=100, spacing=40, radius=15, font=font)
-
+scroll_y = 0
+dropdown = Dropdown(100, 600, 100, 50, ["apple", "ball", "car", "dog"])
 running = True
 while running:
     screen.fill((30,30,30))
@@ -84,10 +85,14 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        res = radio_group.handle_event(mouse_pos, event)
-        if res is not None:
-            print("Selected:", radio_group.get_selected())
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 4:
+                scroll_y += 20
+            if event.button == 5:
+                scroll_y -= 20
 
-    radio_group.draw(screen)
+        dropdown.handle_event(mouse_pos, event, [0, scroll_y])
+
+    dropdown.draw(screen, [0, scroll_y])
+
     pygame.display.flip()
-

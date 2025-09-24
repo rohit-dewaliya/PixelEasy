@@ -22,5 +22,10 @@ class Cursor:
             self.cursors[cursor] = scale_image_size(load_image("cursors/" + self.cursor_type + "/" + cursor + ".png"),
                                                     *self.cursor_size)
 
+    def reset_cursors(self, type):
+        self.cursor_type = type
+
+        self.load_cursors()
+
     def display_cursor(self, display, mouse_pos):
         display.blit(self.cursors[self.selected_cursor], mouse_pos)

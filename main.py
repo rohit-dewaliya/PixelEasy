@@ -223,7 +223,8 @@ class Game:
                 for event in events:
                     res = radio_group.handle_event(local_mouse_pos, event, [0,scroll_y])
                     if res is not None:
-                        print("Selected:", radio_group.get_selected())
+                        type = radio_group.get_selected()[1]
+                        self.cursor.reset_cursors(type)
 
                 radio_group.draw(self.CONFIG_DISPLAY, [0, scroll_y])
 
