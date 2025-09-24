@@ -25,6 +25,8 @@ class MenuManager:
         self.min_scroll = ((len(self.button_names) * 50 + len(self.button_names)  * self.offset) - self.display.get_height() -
                             self.offset * 5)
 
+        self.selected_button = 'pencil'
+
         self.create_buttons()
 
     def reset_displays(self, display, display_pos, canvas_screen):
@@ -56,4 +58,11 @@ class MenuManager:
 
         pos = [mouse_pos[0] - self.display_pos[0], mouse_pos[1] - self.display_pos[1]]
         for index, button in enumerate(self.menu_buttons.items()):
-            button[1].display(self.display, _hover, self.canvas_screen, pos, events, self.scroll)
+            name, button = button
+            if button.display(self.display, _hover, self.canvas_screen, pos, events, self.scroll):
+                self.selected_button = name
+                if name == 'exit':
+                    quit()
+            if name == self.selected_button:
+                pygame.draw.rect(self.display, (255, 255, 255), (button.x - self.scroll[0], button.y -
+                                                                 self.scroll[1], button.width, button.height), 3)

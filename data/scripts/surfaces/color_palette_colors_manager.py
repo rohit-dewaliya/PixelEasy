@@ -36,7 +36,6 @@ class ColorPaletteColorsManager:
                     palette_data += str(button) + '\n'
                 with open(file_path, 'w') as file:
                     file.write(palette_data)
-                print(f"Palette exported successfully to {file_path}")
             except Exception as e:
                 print(f"Error exporting palette: {e}")
 
@@ -51,8 +50,9 @@ class ColorPaletteColorsManager:
                 with open(file_path, 'r') as file:
                     palette_data = file.readlines()
                     for color in palette_data:
-                        color = eval(color)
-                        self.add_color(tuple(color))
+                        if color:
+                            color = eval(color)
+                            self.add_color(tuple(color))
             except Exception as e:
                 print(f"Error importing palette: {e}")
 
@@ -65,9 +65,18 @@ class ColorPaletteColorsManager:
             height = ((num) // 4 + 1) * self.color_size
             self.min_scroll = max(0, (height - self.display_size[1]))
 
+    def rearrage_colors(self):
+        colors = list(self.color_palette.keys())
+        self.color_palette = {}
+
+        for color in colors:
+            self.add_color(color)
+
     def remove_color(self, color):
         if color in self.color_palette:
             del self.color_palette[color]
+
+        self.rearrage_colors()
 
     def display_buttons(self, mouse_pos, events, selected_button, scroll = (0, 0)):
         _hover = self.display_pos[0] < mouse_pos[0] < self.display_pos[0] + self.display.get_width() and self.display_pos[
@@ -80,8 +89,12 @@ class ColorPaletteColorsManager:
                     elif e.button == 5 and self.scroll[1] > 0:
                         self.scroll[1] -= 20
 
-        for color, button in self.color_palette.items():
-            if button.display(self.display, _hover, mouse_pos, events, self.scroll) and _hover:
+        for color, button in list(self.color_palette.items()):
+            clicked, removed = button.display(self.display, _hover, mouse_pos, events, self.scroll)
+            if removed:
+                self.remove_color(color)
+                continue
+            if clicked and _hover:
                 self.selected_color = color
                 selected_button.color = color
 

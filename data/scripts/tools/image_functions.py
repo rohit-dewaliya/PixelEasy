@@ -33,7 +33,17 @@ def clip_surface(surface, x, y, x_size, y_size):
     image = surface.subsurface(handle_surface.get_clip())
     return image.copy()
 
-import pygame
+def recolor_image(image, new_color, alpha=255):
+    recolored = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+
+    recolored.fill((*new_color, alpha))
+
+    if image.get_masks()[3] != 0:
+        mask = pygame.mask.from_surface(image)
+        mask_surf = mask.to_surface(setcolor=(*new_color, alpha), unsetcolor=(0, 0, 0, 0))
+        recolored.blit(mask_surf, (0, 0))
+
+    return recolored
 
 def add_border(image, border_size=2, border_color=(255, 255, 255), alpha=255):
     border_color = (*border_color, alpha)
