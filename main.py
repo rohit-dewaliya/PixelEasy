@@ -5,7 +5,7 @@ from data.scripts.tools.image_functions import scale_image_size, load_image, rec
 from data.scripts.surfaces.color_palette_manager import ColorPaletteManager
 from data.scripts.surfaces.menu_manager import MenuManager
 from data.scripts.surfaces.canvas_manager import CanvasManager
-from data.scripts.ui.input_fields import Slider
+from data.scripts.ui.input_fields import Slider, Dropdown, RadioButtonGroup
 from data.scripts.ui.button import ColorChooseButton
 from data.scripts.tools.font import Font
 from data.scripts.ui.cursor import Cursor
@@ -40,7 +40,7 @@ class Game:
 
     def screen_size(self, screen_size):
         self.SCREEN_SIZE = (max(screen_size[0], self.MIN_SCREEN_SIZE[0]),
-                                               max(screen_size[1], self.MIN_SCREEN_SIZE[1]))
+                            max(screen_size[1], self.MIN_SCREEN_SIZE[1]))
         self.SCREEN = pygame.display.set_mode(self.SCREEN_SIZE, pygame.RESIZABLE)
 
         self.FRAME_SIZE = [self.SCREEN_SIZE[0] - 2, 200]
@@ -52,14 +52,12 @@ class Game:
         self.config_margin = 100
         self.CONFIG_DISPLAY_SIZE = [self.SCREEN_SIZE[0] - self.config_margin, self.SCREEN_SIZE[1] - self.config_margin]
 
-
         self.COLOR_PALETTE_POS = [1, 1]
         self.COLOR_PALETTE_COLORS_POS = [1, 60]
         self.FRAME_POS = [self.COLOR_PALETTE_POS[0], self.COLOR_PALETTE_SIZE[1] + 2]
         self.CANVAS_POS = [self.COLOR_PALETTE_SIZE[0] + 2, self.COLOR_PALETTE_POS[1]]
         self.MENU_POS = [self.COLOR_PALETTE_SIZE[0] + self.CANVAS_SIZE[0] + 3, self.COLOR_PALETTE_POS[1]]
         self.CONFIG_DISPLAY_POS = [self.config_margin // 2, self.config_margin // 2]
-
 
         self.COLOR_PALETTE_DISPLAY = pygame.Surface(self.COLOR_PALETTE_SIZE)
         self.COLOR_PALETTE_COLORS_DISPLAY = pygame.Surface(self.COLOR_PALETTE_COLORS_SIZE)
@@ -68,10 +66,10 @@ class Game:
         self.CANVAS_DISPLAY = pygame.Surface(self.CANVAS_SIZE)
         self.CONFIG_DISPLAY = pygame.Surface(self.CONFIG_DISPLAY_SIZE)
 
-
         if not self.color_palette_manager:
             self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
-                                                  self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
+                                                             self.COLOR_PALETTE_COLORS_DISPLAY,
+                                                             self.COLOR_PALETTE_COLORS_POS)
         else:
             self.color_palette_manager.reset_displays(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
                                                       self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
@@ -86,7 +84,6 @@ class Game:
         else:
             self.canvas_manager.reset_display(self.CANVAS_DISPLAY, self.CANVAS_POS)
 
-
     def configure_setting(self):
         from data.scripts.tools.file_manager import read_json_file, write_json_file
 
@@ -99,19 +96,33 @@ class Game:
         button_size = 40
         slider_size = [150, 10]
         offset_width = self.configure_text.get_width("a" * 60, 5)
+        sliders = {}
+        radio_groups = {}
 
         for key, values in config_data.items():
             name = key.replace('_', ' ').title()
             _input = None
             slider = None
             rect = None
+            distance = 0
 
             text_width = self.configure_text.get_width(name, 5)
 
             if values['type'] == 'dropdown':
-                continue
+                radio_group_x = self.CONFIG_DISPLAY_SIZE[0] - 200  # text_x + text_width + (offset_width - text_width)
+                radio_group_y = pos_y + (self.configure_text.image_height - button_size) // 2
+
+                radio_group = RadioButtonGroup(values['options'], radio_group_x, radio_group_y)
+                print(values['value'])
+
+                rect = pygame.Rect(text_x - 20, radio_group.height, radio_group_x + radio_group.width + 30,
+                                   radio_group.height + 10)
+
+                radio_groups[name] = [text_x, pos_y, radio_group, rect]
+                distance = radio_group.height + 50
+
             if values['type'] == 'color':
-                button_x = text_x + text_width + (offset_width - text_width)
+                button_x = self.CONFIG_DISPLAY_SIZE[0] - 200 # text_x + text_width + (offset_width - text_width)
                 button_y = pos_y + (self.configure_text.image_height - button_size) // 2
 
                 slider_x = button_x - (slider_size[0] - button_size) // 2
@@ -121,15 +132,16 @@ class Game:
                 slider = Slider(slider_x, slider_y, slider_size[0], slider_size[1], 0, 255, 255)
                 rect = pygame.Rect(text_x - 20, button_y, button_x + 30 + slider_size[0], button_size + slider_size[1]
                                    + 10)
+                sliders[name] = [text_x, pos_y, _input, rect, slider]
+                distance = button_size + slider_size[1] + 50
 
-            configure_data[name] = [text_x, pos_y, _input, rect, slider]
-            pos_y += option_dis
+            # configure_data[name] = [text_x, pos_y, _input, rect, slider]
+            pos_y += distance
 
         n = len(config_data)
-        min_scroll = n * option_dis - self.CONFIG_DISPLAY_SIZE[1]
+        min_scroll = pos_y - self.CONFIG_DISPLAY_SIZE[1]
 
-        return configure_data, min_scroll
-
+        return sliders, radio_groups, min_scroll
 
     def color_chooser(self, color):
         hex_color = "#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
@@ -141,7 +153,7 @@ class Game:
 
         bg = scale_image_size(load_image('background.png', 50), *self.CONFIG_DISPLAY_SIZE)
 
-        config_data, min_scroll = self.configure_setting()
+        sliders, radio_groups, min_scroll = self.configure_setting()
 
         config_window_border = 6
 
@@ -162,7 +174,7 @@ class Game:
 
             self.CONFIG_DISPLAY.blit(bg, (0, 0))
 
-            for name, _input in config_data.items():
+            for name, _input in sliders.items():
                 if _input is None:
                     continue
 
@@ -192,6 +204,29 @@ class Game:
                         button.color = color
                         button.recolor_foreground(color)
 
+            for name, _input in radio_groups.items():
+                if _input is None:
+                    continue
+
+                radio_group = _input[2]
+                rect = _input[3]
+
+                if rect.collidepoint([local_mouse_pos[0], local_mouse_pos[1] + scroll_y]):
+                    self.configure_text_hover.display_fonts(
+                        self.CONFIG_DISPLAY, name, [_input[0], _input[1] - scroll_y], 10
+                    )
+                else:
+                    self.configure_text.display_fonts(
+                        self.CONFIG_DISPLAY, name, [_input[0], _input[1] - scroll_y], 10
+                    )
+
+                for event in events:
+                    res = radio_group.handle_event(local_mouse_pos, event, [0,scroll_y])
+                    if res is not None:
+                        print("Selected:", radio_group.get_selected())
+
+                radio_group.draw(self.CONFIG_DISPLAY, [0, scroll_y])
+
             for event in events:
                 if event.type == pygame.QUIT:
                     run = False
@@ -205,12 +240,10 @@ class Game:
                     elif event.button == 5 and scroll_y > 0:
                         scroll_y -= 20
 
-
             self.SCREEN.blit(self.CONFIG_DISPLAY, self.CONFIG_DISPLAY_POS)
             self.cursor.display_cursor(self.SCREEN, mouse_pos)
             pygame.display.flip()
             self.CLOCK.tick(self.FPS)
-
 
     def main(self):
         try:
@@ -245,7 +278,8 @@ class Game:
 
                 # self.dropdown.draw(self.CANVAS_DISPLAY, self.CANVAS_POS, mouse_pos)
 
-                self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE), self.COLOR_PALETTE_POS)
+                self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE),
+                                 self.COLOR_PALETTE_POS)
                 self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_COLORS_DISPLAY, *self.COLOR_PALETTE_COLORS_SIZE),
                                  self.COLOR_PALETTE_COLORS_POS)
                 self.SCREEN.blit(scale_image_size(self.FRAME_DISPLAY, *self.FRAME_SIZE), self.FRAME_POS)
@@ -259,6 +293,7 @@ class Game:
             print("Game interrupted by user.")
         finally:
             pygame.quit()
+
 
 if __name__ == "__main__":
     game = Game()
