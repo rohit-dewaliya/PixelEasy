@@ -1,12 +1,14 @@
 import pygame
 
 from pygame.locals import *
+
+from data.scripts.tools.file_manager import write_json_file
 from data.scripts.tools.image_functions import scale_image_size, load_image, recolor_image
 from data.scripts.surfaces.color_palette_manager import ColorPaletteManager
 from data.scripts.surfaces.menu_manager import MenuManager
 from data.scripts.surfaces.canvas_manager import CanvasManager
 from data.scripts.ui.input_fields import Slider, Dropdown, RadioButtonGroup
-from data.scripts.ui.button import ColorChooseButton
+from data.scripts.ui.button import ColorChooseButton, TextButton
 from data.scripts.tools.font import Font
 from data.scripts.ui.cursor import Cursor
 
@@ -35,6 +37,7 @@ class Game:
 
         self.configure_text = Font('small_font.png', pygame.Color((255, 255, 255, 100)), 3)
         self.configure_text_hover = Font('small_font.png', pygame.Color((255, 255, 255, 250)), 3)
+        self.config_data = {}
 
         # self.text_input = TextInput(50, 80, 300, 40)
 
@@ -87,7 +90,7 @@ class Game:
     def configure_setting(self):
         from data.scripts.tools.file_manager import read_json_file, write_json_file
 
-        config_data = read_json_file('data/config.json')
+        self.config_data = read_json_file('data/config.json')
         configure_data = {}
 
         pos_y = 50
@@ -99,8 +102,8 @@ class Game:
         sliders = {}
         radio_groups = {}
 
-        for key, values in config_data.items():
-            name = key.replace('_', ' ').title()
+        for key, values in self.config_data.items():
+            name = key
             _input = None
             slider = None
             rect = None
@@ -112,13 +115,13 @@ class Game:
                 radio_group_x = self.CONFIG_DISPLAY_SIZE[0] - 200  # text_x + text_width + (offset_width - text_width)
                 radio_group_y = pos_y + (self.configure_text.image_height - button_size) // 2
 
-                radio_group = RadioButtonGroup(values['options'], radio_group_x, radio_group_y)
-                print(values['value'])
+                radio_group = RadioButtonGroup(values['options'], radio_group_x, radio_group_y,
+                                               selected_option=values['options'].index(values['value']))
 
                 rect = pygame.Rect(text_x - 20, radio_group.height, radio_group_x + radio_group.width + 30,
                                    radio_group.height + 10)
 
-                radio_groups[name] = [text_x, pos_y, radio_group, rect]
+                radio_groups[name] = [text_x, pos_y, radio_group, rect, values['value']]
                 distance = radio_group.height + 50
 
             if values['type'] == 'color':
@@ -128,17 +131,18 @@ class Game:
                 slider_x = button_x - (slider_size[0] - button_size) // 2
                 slider_y = button_y + button_size + 10
 
-                _input = ColorChooseButton(button_x, button_y, button_size, button_size, values['value'])
-                slider = Slider(slider_x, slider_y, slider_size[0], slider_size[1], 0, 255, 255)
+                color = values['value'][0 : 3]
+                alpha = values['value'][-1]
+
+                _input = ColorChooseButton(button_x, button_y, button_size, button_size, color, alpha)
+                slider = Slider(slider_x, slider_y, slider_size[0], slider_size[1], 0, 255, alpha)
                 rect = pygame.Rect(text_x - 20, button_y, button_x + 30 + slider_size[0], button_size + slider_size[1]
                                    + 10)
-                sliders[name] = [text_x, pos_y, _input, rect, slider]
+                sliders[name] = [text_x, pos_y, _input, rect, slider, (*color, alpha)]
                 distance = button_size + slider_size[1] + 50
 
-            # configure_data[name] = [text_x, pos_y, _input, rect, slider]
             pos_y += distance
 
-        n = len(config_data)
         min_scroll = pos_y - self.CONFIG_DISPLAY_SIZE[1]
 
         return sliders, radio_groups, min_scroll
@@ -148,8 +152,17 @@ class Game:
         self.color_chosen = colorchooser.askcolor(color=hex_color, title="Choose Color")
         return self.color_chosen[0]
 
+    def retrun_main_screen(self, args):
+        self.setting_run = False
+        config = {}
+        for arg in args:
+            for key, value in arg.items():
+                self.config_data[key]["value"] = value[-1]
+
+        write_json_file('data/config.json', self.config_data)
+
     def setting_screen(self):
-        run = True
+        self.setting_run = True
 
         bg = scale_image_size(load_image('background.png', 50), *self.CONFIG_DISPLAY_SIZE)
 
@@ -157,9 +170,12 @@ class Game:
 
         config_window_border = 6
 
+        text_button = TextButton(self.SCREEN_SIZE[0] - 200, self.SCREEN_SIZE[1] - 45, 100, 40, "Apply",
+                                 self.retrun_main_screen, (200, 200, 200), (255, 0, 0), sliders, radio_groups)
+
         scroll_y = 0
 
-        while run:
+        while self.setting_run:
             self.SCREEN.fill((0, 0, 0))
             pygame.draw.rect(self.SCREEN, (255, 255, 255), (self.CONFIG_DISPLAY_POS[0] - config_window_border // 2,
                                                             self.CONFIG_DISPLAY_POS[1] - config_window_border // 2,
@@ -174,6 +190,8 @@ class Game:
 
             self.CONFIG_DISPLAY.blit(bg, (0, 0))
 
+            text_button.display(self.SCREEN, mouse_pos, events, [0, 0])
+
             for name, _input in sliders.items():
                 if _input is None:
                     continue
@@ -186,6 +204,7 @@ class Game:
                     value = slider.handle_event(local_mouse_pos, event, [0, scroll_y])
                     if value:
                         button.reset_alpha(value)
+                        _input[-1] = (*button.color, value)
 
                 slider.draw(self.CONFIG_DISPLAY, [0, scroll_y])
 
@@ -203,6 +222,8 @@ class Game:
                     if color:
                         button.color = color
                         button.recolor_foreground(color)
+                        _input[-1] = (*color, button.alpha)
+                        print(_input)
 
             for name, _input in radio_groups.items():
                 if _input is None:
@@ -223,17 +244,20 @@ class Game:
                 for event in events:
                     res = radio_group.handle_event(local_mouse_pos, event, [0,scroll_y])
                     if res is not None:
-                        type = radio_group.get_selected()[1]
+                        type = radio_group.get_selected()
                         self.cursor.reset_cursors(type)
+                        _input[-1] = type
 
                 radio_group.draw(self.CONFIG_DISPLAY, [0, scroll_y])
 
             for event in events:
                 if event.type == pygame.QUIT:
-                    run = False
+                    self.setting_run = False
                     self.run = False
                 elif event.type == VIDEORESIZE:
                     self.screen_size(list(event.size))
+                    text_button.x = self.SCREEN_SIZE[0] - 200
+                    text_button.y = self.SCREEN_SIZE[1] - 45
                     bg = scale_image_size(load_image('background.png', 50), *self.CONFIG_DISPLAY_SIZE)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 4 and scroll_y < min_scroll:
@@ -262,6 +286,7 @@ class Game:
 
                 self.color_palette_manager.display_buttons(mouse_pos, events)
                 self.menu_manager.display_buttons(mouse_pos, events)
+                self.canvas_manager.display_surface(mouse_pos, events)
 
                 for event in events:
                     if event.type == QUIT:

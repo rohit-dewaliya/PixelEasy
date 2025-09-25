@@ -40,8 +40,10 @@ class Button:
 
 
 class TextButton(Button):
+    instances = []
+
     def __init__(self, x, y, width, height, text, function = None,
-                 text_color=(255, 255, 255), text_hover_color=(255, 255, 0), args = None):
+                 text_color=(255, 255, 255, 255), text_hover_color=(255, 255, 0, 255), *args):
         super().__init__(x, y, width, height)
         self.text = text
         self.text_color = text_color
@@ -57,6 +59,21 @@ class TextButton(Button):
         self.text_bg_hover = scale_image_size(background_hover, self.width, self.height)
 
         self.args = args
+        TextButton.instances.append(self)
+
+    @classmethod
+    def update_buttons(cls, text_color, text_hover_color, text_bg_color = (255, 255, 255, 255), text_bg_hover_color =
+    (255, 255, 255, 255)):
+        for text_button in cls.instances:
+            text_button.text_color = text_color
+            text_button.text_hover_color = text_hover_color
+            text_button.text_font = Font('small_font.png', text_color, 2)
+            text_button.text_hover_font = Font('small_font.png', text_hover_color, 2)
+            text_button.text_bg = recolor_image(scale_image_size(background, text_button.width, text_button.height),
+                                                text_bg_color[0 : 3], text_bg_color[-1])
+            text_button.text_bg_hover = recolor_image(scale_image_size(background_hover, text_button.width,
+                                                                      text_button.height),
+                                                text_bg_hover_color[0: 3], text_bg_hover_color[-1])
 
     def display(self, display, mouse_pos, events, scroll=(0, 0)):
         clicked = False
@@ -87,7 +104,7 @@ class TextButton(Button):
         return clicked
 
 class ColorChooseButton(Button):
-    def __init__(self, x, y, width, height, color = (255, 0, 0), margin = 5):
+    def __init__(self, x, y, width, height, color = (255, 0, 0), alpha = 255, margin = 5):
         super().__init__(x, y, width, height)
         self.color = color
         self.alpha = 255

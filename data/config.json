@@ -1,71 +1,154 @@
 {
-  "cursor_theme": {
-    "type": "dropdown",
-    "options": ["dark", "light"],
-    "value": "dark"
-  },
-  "screen_color": {
-    "type": "color",
-    "value": [255, 255, 255]
-  },
-  "canvas_background_color": {
-    "type": "color",
-    "value": [0, 0, 0]
-  },
-  "frame_background_color": {
-    "type": "color",
-    "value": [0, 0, 0]
-  },
-  "color_palette_background_color": {
-    "type": "color",
-    "value": [0, 0, 0]
-  },
-  "color_palette_colors_background_color": {
-    "type": "color",
-    "value": [0, 0, 0]
-  },
-  "framw_background_color": {
-    "type": "color",
-    "value": [0, 0, 0]
-  },
-  "menu_background_color": {
-    "type": "color",
-    "value": [0, 0, 0]
-  },
-  "button_text_color": {
-    "type": "color",
-    "value": [255, 255, 255]
-  },
-  "button_text_hover_color": {
-    "type": "color",
-    "value": [255, 255, 0]
-  },
-  "button_text_background_color": {
-    "type": "color",
-    "value": [0, 18, 154]
-  },
-  "text_button_hover_background_color": {
-    "type": "color",
-    "value": [0, 21, 181]
-  },
-  "text_button_hover_border_color": {
-    "type": "color",
-    "value": [255, 255, 255]
-  },
-  "menu_icon_color": {
-    "type": "color",
-    "value": [1, 1, 1]
-  },
-  "menu_icon_hover_color": {
-    "type": "color",
-    "value": [1, 1, 1]
-  },
-  "menu_button_background_color": {
-    "type": "color",
-    "value": [0, 18, 154]
-  },
-  "menu_button_hover_background_color": {
-    "type": "color",
-    "value": [0, 21, 181]
-  }
+    "Cursor Theme": {
+        "type": "dropdown",
+        "options": [
+            "dark",
+            "light"
+        ],
+        "value": "dark"
+    },
+    "Screen Color": {
+        "type": "color",
+        "value": [
+            255,
+            255,
+            255,
+            129.20000000000002
+        ]
+    },
+    "Canvas Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            0,
+            0,
+            255
+        ]
+    },
+    "Frame Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            0,
+            0,
+            255
+        ]
+    },
+    "Color Palette Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            0,
+            0,
+            255
+        ]
+    },
+    "Color Palette Colors Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            0,
+            0,
+            255
+        ]
+    },
+    "Framw Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            0,
+            0,
+            255
+        ]
+    },
+    "Menu Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            0,
+            0,
+            255
+        ]
+    },
+    "Button Text Color": {
+        "type": "color",
+        "value": [
+            255,
+            255,
+            255,
+            255
+        ]
+    },
+    "Button Text Hover Color": {
+        "type": "color",
+        "value": [
+            255,
+            255,
+            0,
+            86.7
+        ]
+    },
+    "Button Text Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            18,
+            154,
+            255
+        ]
+    },
+    "Text Button Hover Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            21,
+            181,
+            255
+        ]
+    },
+    "Text Button Hover Border Color": {
+        "type": "color",
+        "value": [
+            255,
+            255,
+            255,
+            255
+        ]
+    },
+    "Menu Icon Color": {
+        "type": "color",
+        "value": [
+            1,
+            1,
+            1,
+            255
+        ]
+    },
+    "Menu Icon Hover Color": {
+        "type": "color",
+        "value": [
+            1,
+            1,
+            1,
+            255
+        ]
+    },
+    "Menu Button Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            18,
+            154,
+            255
+        ]
+    },
+    "Menu Button Hover Background Color": {
+        "type": "color",
+        "value": [
+            0,
+            21,
+            181,
+            255
+        ]
+    }
 }

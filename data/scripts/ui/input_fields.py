@@ -89,14 +89,14 @@ class RadioButton:
 
 
 class RadioButtonGroup:
-    def __init__(self, options, x, y, spacing = 10, radius = 15,
+    def __init__(self, options, x, y, spacing = 10, radius = 15, selected_option = 0,
                  circle_color=(200, 200,200), fill_color=(200, 0, 0), text_color=(255, 255, 255)):
         self.buttons = []
         self.height = 0
         self.widht = 0
         for i, label in enumerate(options):
             self.buttons.append(RadioButton(x, y + i*spacing + self.height, radius, label,
-                                            selected=(i==0),
+                                            selected=(i==selected_option),
                                             circle_color=circle_color,
                                             fill_color=fill_color,
                                             text_color=text_color))
@@ -119,7 +119,7 @@ class RadioButtonGroup:
     def get_selected(self):
         for i, btn in enumerate(self.buttons):
             if btn.selected:
-                return i, btn.label
+                return btn.label
         return None, None
 
 class Dropdown:
