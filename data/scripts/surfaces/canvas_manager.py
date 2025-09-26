@@ -32,7 +32,7 @@ class CanvasManager:
 
         self.canvas = Canvas(self.surface_size)
         self.image = self.canvas.image
-        self.canvas_operations = {"pencil": False, "eraser": False, "line": False}
+        self.canvas_operations = {"pencil": False, "eraser": False, "line": False, 'rectangle': False}
         self.border = 2
         self.border_color = (255, 0, 0)
         self.drawing_fixed_pos = None
@@ -94,6 +94,29 @@ class CanvasManager:
                     self.repos_surface_rect(self.surface_pos)
                     self.fixed_pos = mouse_pos
 
+    def set_scaling_cursor(self, pos):
+        fixed_pos_x, fixed_pos_y = self.drawing_fixed_pos
+        new_pos_x, new_pos_y = pos
+
+        if new_pos_x > fixed_pos_x and new_pos_y > fixed_pos_y:
+            self.cursor.selected_cursor = "dgn1"
+        elif new_pos_x < fixed_pos_x and new_pos_y > fixed_pos_y:
+            self.cursor.selected_cursor = "dgn2"
+        elif new_pos_x > fixed_pos_x and new_pos_y < fixed_pos_y:
+            self.cursor.selected_cursor = "dgn2"
+        elif new_pos_x < fixed_pos_x and new_pos_y < fixed_pos_y:
+            self.cursor.selected_cursor = "dgn1"
+        elif new_pos_x == fixed_pos_x and new_pos_y > fixed_pos_y:
+            self.cursor.selected_cursor = "vert"
+        elif new_pos_x == fixed_pos_x and new_pos_y < fixed_pos_y:
+            self.cursor.selected_cursor = "vert"
+        elif new_pos_y == fixed_pos_y and new_pos_x > fixed_pos_x:
+            self.cursor.selected_cursor = "horz"
+        elif new_pos_y == fixed_pos_y and new_pos_x < fixed_pos_x:
+            self.cursor.selected_cursor = "horz"
+        else:
+            self.cursor.selected_cursor = "precision"
+
     def paint_canvas(self, selected, mouse_pos, events):
         x, y = self.get_mouse_pos_on_canvas(mouse_pos)
         layer = self.image[self.canvas.selected_layer]
@@ -104,28 +127,46 @@ class CanvasManager:
                 if event.button == 1:
                     if selected == "pencil":
                         self.canvas_operations["pencil"] = True
+                        self.cursor.selected_cursor = 'handwriting'
+                    elif selected == "eraser":
+                        self.canvas_operations["eraser"] = True
                     elif selected == "line":
                         if not self.canvas_operations["line"]:
                             self.canvas_operations["line"] = True
                             self.drawing_fixed_pos = x, y
                             self.preview = frame.surface.copy()
+                            self.preview.set_colorkey(self.surface_color)
+                    elif selected == "rectangle":
+                        if not self.canvas_operations["rectangle"]:
+                            self.canvas_operations["rectangle"] = True
+                            self.drawing_fixed_pos = x, y
+                            self.preview = frame.surface.copy()
+                            self.preview.set_colorkey(self.surface_color)
                 elif event.button == 3:
                     if selected == "pencil":
                         self.canvas_operations["eraser"] = True
             elif event.type == pygame.MOUSEBUTTONUP:
+                self.cursor.selected_cursor = 'pointer'
                 if event.button == 1:
                     layer = self.image[self.canvas.selected_layer]
                     frame = layer.frames[layer.selected_frame]
-                    pygame.draw.line(frame.surface, (255, 0, 0),
-                                     self.drawing_fixed_pos, [x, y], 1)
+                    if self.canvas_operations["line"]:
+                        pygame.draw.line(frame.surface, (255, 0, 0),
+                                         self.drawing_fixed_pos, [x, y], 1)
+                    if self.canvas_operations["rectangle"]:
+                        rect = pygame.Rect(self.drawing_fixed_pos,
+                                           (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+                        rect.normalize()
+                        pygame.draw.rect(frame.surface, (255, 0, 0), rect, 1)
+
                     self.canvas_operations["pencil"] = False
                     self.canvas_operations["line"] = False
+                    self.canvas_operations["rectangle"] = False
+                    self.canvas_operations["eraser"] = False
                     self.drawing_fixed_pos = None
                     self.preview = None
                 elif event.button == 3:
                     self.canvas_operations["eraser"] = False
-
-
 
         if self.canvas_operations["pencil"]:
             frame.add_color((x, y), (255, 0, 0))
@@ -134,18 +175,22 @@ class CanvasManager:
         elif self.canvas_operations["line"]:
             self.preview.fill(self.surface_color)
             pygame.draw.line(self.preview, (255, 0, 0), self.drawing_fixed_pos, (x, y), 1)
+        elif self.canvas_operations["rectangle"]:
+            self.preview.fill(self.surface_color)
+            rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+            rect.normalize()
+            pygame.draw.rect(self.preview, (255, 0, 0), rect, 1)
 
         if self.preview is not None:
+            self.set_scaling_cursor([x, y])
             self.surface.blit(self.preview, (0, 0))
-
-
 
     def display_surface(self, selected, mouse_pos, events = None):
         self.surface.fill(self.surface_color)
         mouse_pos = [mouse_pos[0] - self.display_pos[0], mouse_pos[1] - self.display_pos[1]]
         self.move_canvas(mouse_pos, events)
         self.surface.blit(self.canvas.render(), (0, 0))
-        self.paint_canvas("line", mouse_pos, events)
+        self.paint_canvas(selected, mouse_pos, events)
         self.display.blit(pygame.transform.scale(self.surface, [self.surface_size[0] * self.scale, self.surface_size[
             1] * self.scale]), self.surface_pos)
         pygame.draw.rect(self.display, self.border_color, (self.surface_pos[0] - self.border, self.surface_pos[1] -

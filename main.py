@@ -287,6 +287,10 @@ class Game:
                 self.menu_manager.display_buttons(mouse_pos, events)
                 self.canvas_manager.display_surface(self.menu_manager.selected_button, mouse_pos, events)
 
+                if self.menu_manager.selected_button == "setting":
+                    self.setting_screen()
+                    self.menu_manager.selected_button = "pencil"
+
                 for event in events:
                     if event.type == QUIT:
                         self.run = False
