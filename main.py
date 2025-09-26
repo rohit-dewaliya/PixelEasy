@@ -3,7 +3,7 @@ import pygame
 from pygame.locals import *
 
 from data.scripts.tools.file_manager import write_json_file
-from data.scripts.tools.image_functions import scale_image_size, load_image, recolor_image
+from data.scripts.tools.image_functions import scale_image_size, load_image
 from data.scripts.surfaces.color_palette_manager import ColorPaletteManager
 from data.scripts.surfaces.menu_manager import MenuManager
 from data.scripts.surfaces.canvas_manager import CanvasManager
@@ -31,7 +31,7 @@ class Game:
         pygame.display.set_caption("PixelEasy")
 
         self.CLOCK = pygame.time.Clock()
-        self.FPS = 30
+        self.FPS = 60
 
         self.run = True
 
@@ -39,7 +39,6 @@ class Game:
         self.configure_text_hover = Font('small_font.png', pygame.Color((255, 255, 255, 250)), 3)
         self.config_data = {}
 
-        # self.text_input = TextInput(50, 80, 300, 40)
 
     def screen_size(self, screen_size):
         self.SCREEN_SIZE = (max(screen_size[0], self.MIN_SCREEN_SIZE[0]),
@@ -286,7 +285,7 @@ class Game:
 
                 self.color_palette_manager.display_buttons(mouse_pos, events)
                 self.menu_manager.display_buttons(mouse_pos, events)
-                self.canvas_manager.display_surface(mouse_pos, events)
+                self.canvas_manager.display_surface(self.menu_manager.selected_button, mouse_pos, events)
 
                 for event in events:
                     if event.type == QUIT:
@@ -296,13 +295,6 @@ class Game:
                             self.setting_screen()
                     elif event.type == VIDEORESIZE:
                         self.screen_size(list(event.size))
-
-                    # choice = self.dropdown.handle_event(event, self.CANVAS_POS, mouse_pos)
-                    # if choice:
-                    #     color = self.colors[choice]
-                    #     print("Selected:", self.colors[choice])
-
-                # self.dropdown.draw(self.CANVAS_DISPLAY, self.CANVAS_POS, mouse_pos)
 
                 self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE),
                                  self.COLOR_PALETTE_POS)
