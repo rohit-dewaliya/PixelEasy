@@ -97,6 +97,7 @@ class ColorPaletteColorsManager:
             if clicked and _hover:
                 self.selected_color = color
                 selected_button.color = color
+                selected_button.recolor_foreground()
 
             if self.selected_color == color:
                 pygame.draw.rect(self.display, (255, 255, 255), (button.x - self.scroll[0], button.y - self.scroll[1],

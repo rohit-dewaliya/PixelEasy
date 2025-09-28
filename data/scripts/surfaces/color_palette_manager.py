@@ -34,6 +34,8 @@ class ColorPaletteManager:
         self.create_select_color_buttons()
         self.selected_color_button = self.select_color_buttons[0]
 
+        self.selected_color = self.selected_color_button.color
+
     def reset_displays(self, display, display_pos, colors_palette, color_palette_pos):
         self.display = display
         self.display_size = display.get_size()
@@ -78,6 +80,7 @@ class ColorPaletteManager:
 
     def color_chooser(self):
         self.color_choosen = colorchooser.askcolor(title="Choose Color")
+        self.selected_color = self.color_choosen[0]
         return self.color_choosen[0]
 
     def display_select_color_button(self, mouse_pos, events, scroll = (0, 0)):
@@ -87,6 +90,8 @@ class ColorPaletteManager:
                     color = self.color_chooser()
                     if color is not None:
                         button.color = color
+                        button.recolor_foreground()
+                        self.selected_color = color
                     self.selected_color_button = button
                 except:
                     pass
@@ -97,4 +102,6 @@ class ColorPaletteManager:
         self.display_add_color_button(mouse_pos, events, scroll)
         self.display_select_color_button(mouse_pos, events, scroll)
 
+
         self.color_palette_color_manager.display_buttons(mouse_pos, events, self.selected_color_button, scroll)
+        self.selected_color = self.selected_color_button.color

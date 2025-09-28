@@ -58,6 +58,12 @@ class Layer:
         for frame in self.frames:
             frame.resize(new_size)
 
+    def copy(self):
+        new_layer = Layer(self.surface_size)
+        new_layer.frames = [frame.copy() for frame in self.frames]
+        new_layer.selected_frame = self.selected_frame
+        return new_layer
+
 class Canvas:
     def __init__(self, surface_size):
         self.surface_size = surface_size
@@ -67,6 +73,10 @@ class Canvas:
     @property
     def total_layers(self):
         return len(self.image)
+
+    def create_new_image(self):
+        self.image = [Layer(self.surface_size)]
+        self.selected_layer = 0
 
     def add_layer(self, layer = None):
         if layer:
@@ -90,3 +100,9 @@ class Canvas:
     def resize(self, new_size):
         for layer in self.image:
             layer.resize(new_size)
+
+    def copy(self):
+        new_canvas = Canvas(self.surface_size)
+        new_canvas.image = [layer.copy() for layer in self.image]
+        new_canvas.selected_layer = self.selected_layer
+        return new_canvas

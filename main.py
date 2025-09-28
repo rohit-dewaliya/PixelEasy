@@ -1,3 +1,5 @@
+from tkinter import colorchooser
+
 import pygame
 
 from pygame.locals import *
@@ -11,8 +13,7 @@ from data.scripts.ui.input_fields import Slider, Dropdown, RadioButtonGroup
 from data.scripts.ui.button import ColorChooseButton, TextButton
 from data.scripts.tools.font import Font
 from data.scripts.ui.cursor import Cursor
-
-from tkinter import colorchooser, Toplevel, Scale, HORIZONTAL, Button
+from data.scripts.history_manager import HistoryManager
 
 pygame.init()
 
@@ -23,6 +24,7 @@ class Game:
         self.color_palette_manager = None
         self.menu_manager = None
         self.canvas_manager = None
+        self.history_manager = HistoryManager()
 
         self.cursor = Cursor(cursor_size=(16, 16))
 
@@ -82,7 +84,7 @@ class Game:
             self.menu_manager.reset_displays(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
 
         if not self.canvas_manager:
-            self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS, self.cursor)
+            self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS, self.cursor, self.history_manager)
         else:
             self.canvas_manager.reset_display(self.CANVAS_DISPLAY, self.CANVAS_POS)
 
@@ -285,11 +287,21 @@ class Game:
 
                 self.color_palette_manager.display_buttons(mouse_pos, events)
                 self.menu_manager.display_buttons(mouse_pos, events)
-                self.canvas_manager.display_surface(self.menu_manager.selected_button, mouse_pos, events)
+                self.canvas_manager.display_surface(self.menu_manager.selected_button, self.color_palette_manager.selected_color,
+                                                    mouse_pos, events)
 
                 if self.menu_manager.selected_button == "setting":
                     self.setting_screen()
                     self.menu_manager.selected_button = "pencil"
+                # elif self.menu_manager.selected_button == "redo":
+                #     self.canvas_manager.image = self.history_manager.redo(self.canvas_manager.image)
+                #     self.canvas_manager.canvas.image = self.canvas_manager.image
+                #     self.menu_manager.selected_button = "pencil"
+                # elif self.menu_manager.selected_button == "undo":
+                #     state = self.canvas_manager.canvas.image
+                #     self.canvas_manager.canvas.image = self.history_manager.undo(state)
+                #     self.menu_manager.selected_button = "pencil"
+
 
                 for event in events:
                     if event.type == QUIT:
@@ -297,6 +309,24 @@ class Game:
                     if event.type == KEYDOWN:
                         if event.key == pygame.K_a:
                             self.setting_screen()
+                        if event.key == pygame.K_z and (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                            state = self.canvas_manager.image
+                            snapshot = self.canvas_manager.canvas.image = self.history_manager.undo(state)
+                            if self.history_manager.undo_stack == []:
+                                self.canvas_manager.canvas.create_new_image()
+                            else:
+                                self.canvas_manager.image = snapshot
+                            self.canvas_manager.image = self.canvas_manager.canvas.image
+                            self.menu_manager.selected_button = "pencil"
+
+                        if event.key == pygame.K_y and (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                            print("Redo")
+                            state = self.canvas_manager.image
+                            snapshot = self.canvas_manager.canvas.image = self.history_manager.redo(state)
+                            self.canvas_manager.image = snapshot
+                            self.canvas_manager.image = self.canvas_manager.canvas.image
+                            self.menu_manager.selected_button = "pencil"
+
                     elif event.type == VIDEORESIZE:
                         self.screen_size(list(event.size))
 

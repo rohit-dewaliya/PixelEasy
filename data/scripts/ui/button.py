@@ -120,8 +120,7 @@ class ColorChooseButton(Button):
         self.alpha = alpha
         self.fore_color = recolor_image(self.fore_color, self.color, self.alpha)
 
-    def recolor_foreground(self, color):
-        self.color = color
+    def recolor_foreground(self):
         self.fore_color = recolor_image(self.fore_color, self.color, self.alpha)
 
     def display(self, display, mouse_pos, events, scroll=(0, 0)):
@@ -136,8 +135,7 @@ class ColorChooseButton(Button):
             display.blit(self.text_bg, (self.x - scroll[0], self.y - scroll[1]))
         # pygame.draw.rect(display, pygame.Color(self.color), (self.x + self.margin // 2 - scroll[0], self.y + self.margin
         #                        // 2 - scroll[1], self.width - self.margin, self.height - self.margin))
-        display.blit(self.fore_color, (self.x + self.margin // 2 - scroll[0],
-                                                                    self.y + self.margin // 2 - scroll[1]))
+        display.blit(self.fore_color, (self.x + self.margin // 2 - scroll[0], self.y + self.margin // 2 - scroll[1]))
         return clicked
 
 class IconButton(Button):

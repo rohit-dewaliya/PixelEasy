@@ -28,7 +28,7 @@ class Cursor:
         self.load_cursors()
 
     def display_cursor(self, display, mouse_pos):
-        if self.selected_cursor in ["pointer"]:
+        if self.selected_cursor in ["pointer", "handwriting"]:
             display.blit(self.cursors[self.selected_cursor], mouse_pos)
         else:
             display.blit(self.cursors[self.selected_cursor], [mouse_pos[0] - self.cursor_size[0] // 2, mouse_pos[1] -
