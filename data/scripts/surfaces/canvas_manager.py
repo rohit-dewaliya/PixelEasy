@@ -1,10 +1,7 @@
 import pygame
 
-from data.scripts import history_manager
-from data.scripts.tools.image_functions import load_image, scale_image_size
 from data.scripts.tools.font import Font
 from data.scripts.canvas import Canvas
-from data.scripts.history_manager import HistoryManager
 
 mouse_pos_text = Font('small_font.png', (255, 255, 255, 255), 2)
 
@@ -17,13 +14,13 @@ class CanvasManager:
         self.display_pos = display_pos
         self.cursor = cursor
 
-        self.history_manager = history_manager # HistoryManager()
+        self.history_manager = history_manager
 
         self.surface_size = surface_size
         self.scale = scale
         self.max_scale = max_scale
         self.min_scale = min_scale
-        self.surface = pygame.Surface(self.surface_size)
+        self.surface = pygame.Surface(self.surface_size, pygame.SRCALPHA)
         self.surface_color = (255, 255, 255)
         self.surface_pos = [(self.display_size[0] - self.surface_size[0] * 2) // 2, (self.display_size[1]  -
                                                                                      self.surface_size[1]) // 2]
@@ -36,15 +33,18 @@ class CanvasManager:
         self.mouse_pos_text_pos = [5, self.display_size[1]  - 5]
 
         self.canvas = Canvas(self.surface_size)
-        self.image = self.canvas.image
-        self.canvas_operations = {"pencil": False, "eraser": False, "line": False, 'rectangle': False}
+        self.canvas_operations = {"pencil": False, "eraser": False, "line": False, 'rectangle': False,
+                                  "circle": False, "selection": False, "flip horizontally": False, "flip vertically":
+                                      False, "move selection": False, "rotate selection": False, "resize selection":
+                                      False}
         self.border = 2
         self.border_color = (255, 0, 0)
         self.drawing_fixed_pos = None
         self.preview = None
-        # self.layer = self.canvas.image[self.canvas.seleced_layer]
-        # self.frame = self.layer.frames[self.layer.selected_frame]
+        self.canvas_selection = False
+        self.selection_rect = None
 
+        self.draw_size = 2
 
     def reset_display(self, display, display_pos):
         self.display = display
@@ -52,8 +52,6 @@ class CanvasManager:
         self.display_size = self.display.get_size()
         self.surface_pos = [(self.display_size[0] - self.surface_size[0] * 2) // 2, (self.display_size[1] -
                                                                                      self.surface_size[1]) // 2]
-        self.surface_rect = pygame.Rect(*self.surface_pos, self.surface_size[0] * self.scale, self.surface_size[1] *
-                                        self.scale)
         self.surface_rect = pygame.Rect(*self.surface_pos, self.surface_size[0] * self.scale, self.surface_size[1] *
                                         self.scale)
 
@@ -135,7 +133,7 @@ class CanvasManager:
 
     def paint_canvas(self, selected, color, mouse_pos, events):
         x, y = self.get_mouse_pos_on_canvas(mouse_pos)
-        layer = self.image[self.canvas.selected_layer]
+        layer = self.canvas.image[self.canvas.selected_layer]
         frame = layer.frames[layer.selected_frame]
 
         for event in events:
@@ -158,32 +156,52 @@ class CanvasManager:
                             self.drawing_fixed_pos = x, y
                             self.preview = frame.surface.copy()
                             self.preview.set_colorkey(self.surface_color)
+                    elif selected == "circle":
+                        pass
+                    elif selected == "selection":
+                        if not self.canvas_operations["selection"]:
+                            self.canvas_operations["selection"] = True
+                            self.drawing_fixed_pos = x, y
+                            self.preview = frame.surface.copy()
+                            self.preview.set_colorkey(self.surface_color)
+                    elif selected == "flip horizontally":
+                        self.canvas_operations["flip horizontally"] = True
+                    elif selected == "flip vertically":
+                        self.canvas_operations["flip vertically"] = True
                 elif event.button == 3:
                     self.canvas_operations["eraser"] = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.cursor.selected_cursor = 'pointer'
                 if event.button == 1:
-                    layer = self.image[self.canvas.selected_layer]
+                    layer = self.canvas.image[self.canvas.selected_layer]
                     frame = layer.frames[layer.selected_frame]
                     if self.canvas_operations["line"]:
                         pygame.draw.line(frame.surface, color,
-                                         self.drawing_fixed_pos, [x, y], 1)
+                                         self.drawing_fixed_pos, [x, y], self.draw_size)
                     if self.canvas_operations["rectangle"]:
                         rect = pygame.Rect(self.drawing_fixed_pos,
                                            (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
                         rect.normalize()
-                        pygame.draw.rect(frame.surface, color, rect, 1)
+                        pygame.draw.rect(frame.surface, color, rect, self.draw_size)
+                    if self.canvas_operations["selection"]:
+                        self.canvas_selection = True
+                        self.selection_rect = pygame.Rect(self.drawing_fixed_pos,
+                                           (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+
 
                     self.canvas_operations["pencil"] = False
                     self.canvas_operations["line"] = False
                     self.canvas_operations["rectangle"] = False
                     self.canvas_operations["eraser"] = False
+                    self.canvas_operations["selection"] = False
+                    self.canvas_operations["flip horizontally"] = False
+                    self.canvas_operations["flip vertically"] = False
                     self.drawing_fixed_pos = None
                     self.preview = None
-                    self.history_manager.save_state(self.canvas.image)
+                    self.history_manager.save_state(self.canvas.copy())
                 elif event.button == 3:
                     self.canvas_operations["eraser"] = False
-                    self.history_manager.save_state(self.canvas.image)
+                    self.history_manager.save_state(self.canvas.copy())
 
         if self.canvas_operations["pencil"]:
             frame.add_color((x, y), color)
@@ -191,12 +209,32 @@ class CanvasManager:
             frame.remove_color((x, y))
         elif self.canvas_operations["line"]:
             self.preview.fill(self.surface_color)
-            pygame.draw.line(self.preview, color, self.drawing_fixed_pos, (x, y), 1)
+            pygame.draw.line(self.preview, color, self.drawing_fixed_pos, (x, y), self.draw_size)
         elif self.canvas_operations["rectangle"]:
             self.preview.fill(self.surface_color)
             rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
             rect.normalize()
-            pygame.draw.rect(self.preview, color, rect, 1)
+            pygame.draw.rect(self.preview, color, rect, self.draw_size)
+        elif self.canvas_operations["selection"]:
+            self.preview.fill(self.surface_color)
+            rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+            rect.normalize()
+            pygame.draw.rect(self.preview, (255, 0, 255, 100), rect, 1)
+        if self.canvas_selection:
+            if self.canvas_operations["flip horizontally"]:
+                selected_surface = frame.surface.subsurface(self.selection_rect).copy()
+                flipped_surface = pygame.transform.flip(selected_surface, True, False)
+                frame.surface.fill((0, 0, 0, 0), self.selection_rect)
+                frame.surface.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
+                self.canvas_operations["flip horizontally"] = False
+                self.canvas_selection = False
+            elif self.canvas_operations["flip vertically"]:
+                selected_surface = frame.surface.subsurface(self.selection_rect).copy()
+                flipped_surface = pygame.transform.flip(selected_surface, False, True)
+                frame.surface.fill((0, 0, 0, 0), self.selection_rect)
+                frame.surface.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
+                self.canvas_operations["flip vertically"] = False
+                self.canvas_selection = False
 
         if self.preview is not None:
             self.set_scaling_cursor([x, y])
@@ -208,6 +246,9 @@ class CanvasManager:
         self.move_canvas(mouse_pos, events)
         self.surface.blit(self.canvas.render(), (0, 0))
         self.paint_canvas(selected, color, mouse_pos, events)
+        if self.canvas_selection and self.selection_rect:
+            self.selection_rect.normalize()
+            pygame.draw.rect(self.surface, (255, 0, 255, 100), self.selection_rect, 1)
         self.display.blit(pygame.transform.scale(self.surface, [self.surface_size[0] * self.scale, self.surface_size[
             1] * self.scale]), self.surface_pos)
         pygame.draw.rect(self.display, self.border_color, (self.surface_pos[0] - self.border, self.surface_pos[1] -

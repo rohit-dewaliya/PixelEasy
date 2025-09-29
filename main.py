@@ -271,6 +271,19 @@ class Game:
             pygame.display.flip()
             self.CLOCK.tick(self.FPS)
 
+    def undo(self):
+        if self.history_manager.undo_stack == []:
+            self.canvas_manager.canvas.create_new_image()
+            pass
+        state = self.canvas_manager.canvas.copy()
+        self.canvas_manager.canvas = self.history_manager.undo(state)
+        self.menu_manager.selected_button = "pencil"
+
+    def redo(self):
+        state = self.canvas_manager.canvas.copy()
+        self.canvas_manager.canvas = self.history_manager.redo(state)
+        self.menu_manager.selected_button = "pencil"
+
     def main(self):
         try:
             while self.run:
@@ -293,39 +306,55 @@ class Game:
                 if self.menu_manager.selected_button == "setting":
                     self.setting_screen()
                     self.menu_manager.selected_button = "pencil"
-                # elif self.menu_manager.selected_button == "redo":
-                #     self.canvas_manager.image = self.history_manager.redo(self.canvas_manager.image)
-                #     self.canvas_manager.canvas.image = self.canvas_manager.image
-                #     self.menu_manager.selected_button = "pencil"
-                # elif self.menu_manager.selected_button == "undo":
-                #     state = self.canvas_manager.canvas.image
-                #     self.canvas_manager.canvas.image = self.history_manager.undo(state)
-                #     self.menu_manager.selected_button = "pencil"
-
+                elif self.menu_manager.selected_button == "undo":
+                    self.undo()
+                elif self.menu_manager.selected_button == "redo":
+                    self.redo()
 
                 for event in events:
                     if event.type == QUIT:
                         self.run = False
-                    if event.type == KEYDOWN:
+                    elif event.type == KEYDOWN:
                         if event.key == pygame.K_a:
                             self.setting_screen()
-                        if event.key == pygame.K_z and (pygame.key.get_mods() & pygame.KMOD_CTRL):
-                            state = self.canvas_manager.image
-                            snapshot = self.canvas_manager.canvas.image = self.history_manager.undo(state)
-                            if self.history_manager.undo_stack == []:
-                                self.canvas_manager.canvas.create_new_image()
-                            else:
-                                self.canvas_manager.image = snapshot
-                            self.canvas_manager.image = self.canvas_manager.canvas.image
+                        elif event.key == pygame.K_p:
                             self.menu_manager.selected_button = "pencil"
+                        elif event.key == pygame.K_e:
+                            self.menu_manager.selected_button = "eraser"
+                        elif event.key == pygame.K_l:
+                            self.menu_manager.selected_button = "line"
+                        elif event.key == pygame.K_r:
+                            self.menu_manager.selected_button = "rectangle"
+                        elif event.key == pygame.K_c:
+                            self.menu_manager.selected_button = "circle"
+                        elif event.key == pygame.K_f:
+                            self.menu_manager.selected_button = "fill paint"
+                        elif event.key == pygame.K_m:
+                            self.menu_manager.selected_button = "move"
+                        elif event.key == pygame.K_h:
+                            self.menu_manager.selected_button = "flip horizontally"
+                        elif event.key == pygame.K_v:
+                            self.menu_manager.selected_button = "flip vertically"
+                        elif event.key == pygame.K_s:
+                            print("selection tool")
+                        elif event.key == pygame.K_ESCAPE:
+                            self.run = False
 
-                        if event.key == pygame.K_y and (pygame.key.get_mods() & pygame.KMOD_CTRL):
-                            print("Redo")
-                            state = self.canvas_manager.image
-                            snapshot = self.canvas_manager.canvas.image = self.history_manager.redo(state)
-                            self.canvas_manager.image = snapshot
-                            self.canvas_manager.image = self.canvas_manager.canvas.image
-                            self.menu_manager.selected_button = "pencil"
+                        elif pygame.key.get_mods() & pygame.KMOD_CTRL:
+                            if event.key == pygame.K_s:
+                                print("Save file")
+                            elif event.key == pygame.K_o:
+                                print("Import file")
+                            elif event.key == pygame.K_e:
+                                print("Export file")
+                            elif event.key == pygame.K_EQUALS:
+                                print("Open Setting")
+                            elif event.key == pygame.K_z:
+                                self.undo()
+                            elif event.key == pygame.K_y:
+                                self.redo()
+                            elif event.key == pygame.K_r:
+                                print("resize canvas")
 
                     elif event.type == VIDEORESIZE:
                         self.screen_size(list(event.size))

@@ -5,7 +5,7 @@
             "dark",
             "light"
         ],
-        "value": "dark"
+        "value": "light"
     },
     "Screen Color": {
         "type": "color",

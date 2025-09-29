@@ -19,8 +19,8 @@ class MenuManager:
         self.canvas_screen = canvas_screen
         self.text = Font('small_font.png', (255, 255, 255), 2)
         self.button_names = ['pencil', 'eraser', 'rotate', 'canvas move', 'move', 'rectangle', 'line', 'undo', 'redo',
-                             'circle', 'fill paint', 'selection', 'flip horizontally', 'flip vertically', 'export',
-                              'import', 'save', 'setting', 'exit']
+                             'circle', 'fill paint', 'selection', 'flip horizontally', 'flip vertically',
+                             'resize canvas', 'export', 'import', 'save', 'setting', 'exit']
         self.scroll = [0, 0]
         self.offset = 2
         self.min_scroll = ((len(self.button_names) * 50 + (len(self.button_names) - 1)  * self.offset) -
@@ -30,6 +30,7 @@ class MenuManager:
         self.selected_button = 'pencil'
 
         self.create_buttons()
+
 
     def reset_displays(self, display, display_pos, canvas_screen):
         self.display = display

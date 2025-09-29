@@ -8,10 +8,11 @@ class HistoryManager:
     def __init__(self, limit = 30):
         self.undo_stack = []
         self.redo_stack = []
+        self.temp = []
         self.limit = limit
 
     def save_state(self, state):
-        snapshot = copy_image(copy.deepcopy(state))
+        snapshot = copy.deepcopy(state)
         self.undo_stack.append(snapshot)
 
         if len(self.undo_stack) > self.limit:
@@ -21,16 +22,16 @@ class HistoryManager:
 
     def undo(self, state):
         if self.undo_stack:
-            snapshot = copy_image(copy.deepcopy(state))
+            snapshot = copy.deepcopy(state)
             self.redo_stack.append(snapshot)
             snapshot = self.undo_stack.pop()
-            return snapshot
-        return state
+            print(snapshot, end="\n\n\n")
+        return state.copy()
 
     def redo(self, state):
         if self.redo_stack:
-            snapshot = copy_image(copy.deepcopy(state))
+            snapshot = copy.deepcopy(state)
             self.undo_stack.append(snapshot)
             snapshot = self.redo_stack.pop()
-            return snapshot
-        return state
+            return snapshot.copy()
+        return state.copy()
