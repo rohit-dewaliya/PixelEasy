@@ -1,6 +1,7 @@
-from tkinter import colorchooser
 
 import pygame
+
+from tkinter import colorchooser
 
 from pygame.locals import *
 
@@ -9,11 +10,12 @@ from data.scripts.tools.image_functions import scale_image_size, load_image
 from data.scripts.surfaces.color_palette_manager import ColorPaletteManager
 from data.scripts.surfaces.menu_manager import MenuManager
 from data.scripts.surfaces.canvas_manager import CanvasManager
-from data.scripts.ui.input_fields import Slider, Dropdown, RadioButtonGroup
+from data.scripts.ui.input_fields import Slider, RadioButtonGroup
 from data.scripts.ui.button import ColorChooseButton, TextButton
 from data.scripts.tools.font import Font
 from data.scripts.ui.cursor import Cursor
 from data.scripts.history_manager import HistoryManager
+from data.scripts.surfaces.resize_window import ask_width_height
 
 pygame.init()
 
@@ -29,7 +31,7 @@ class Game:
         self.cursor = Cursor(cursor_size=(16, 16))
 
         self.screen_size([1300, 800])
-        pygame.display.set_icon(load_image('design.png'))
+        pygame.display.set_icon(load_image('icon.png'))
         pygame.display.set_caption("PixelEasy")
 
         self.CLOCK = pygame.time.Clock()
@@ -309,6 +311,10 @@ class Game:
                     self.undo()
                 elif self.menu_manager.selected_button == "redo":
                     self.redo()
+                elif self.menu_manager.selected_button == "resize canvas":
+                    new_size = ask_width_height(self.canvas_manager.surface_size)
+                    self.canvas_manager.resize_canvas(new_size)
+                    self.menu_manager.selected_button = "pencil"
 
                 for event in events:
                     if event.type == QUIT:

@@ -26,6 +26,7 @@ class Frame:
     def resize(self, new_size):
         new_surface = pygame.Surface(new_size, pygame.SRCALPHA)
         new_surface.blit(self.surface, (0, 0))
+        self.surface_size = new_size
         self.surface = new_surface
 
 class Layer:
@@ -55,6 +56,7 @@ class Layer:
         return self.frames[self.selected_frame]
 
     def resize(self, new_size):
+        self.surface_size = new_size
         for frame in self.frames:
             frame.resize(new_size)
 
@@ -98,6 +100,7 @@ class Canvas:
         return final_surface
 
     def resize(self, new_size):
+        self.surface_size = new_size
         for layer in self.image:
             layer.resize(new_size)
 

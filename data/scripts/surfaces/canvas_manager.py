@@ -15,6 +15,7 @@ def rotate_rect_90_from_center(rect):
     new_rect.center = rect.center
     return new_rect
 
+
 class CanvasManager:
     def __init__(self, display, display_pos, cursor, history_manager, surface_size = [32, 32], scale = 2, max_scale =
     3, min_scale =1):
@@ -82,11 +83,6 @@ class CanvasManager:
             self.options_surface_size = [220, self.slider_size[1] + 30]
             self.options_surface = pygame.Surface(self.options_surface_size)
 
-        if selected in ['move', 'resize canvas']:
-            self.options_surface_size = [220, self.slider_size[1] + 100]
-            self.options_surface = pygame.Surface(self.options_surface_size)
-
-
     def reset_display(self, display, display_pos):
         self.display = display
         self.display_pos = display_pos
@@ -95,6 +91,12 @@ class CanvasManager:
                                                                                      self.surface_size[1]) // 2]
         self.surface_rect = pygame.Rect(*self.surface_pos, self.surface_size[0] * self.scale, self.surface_size[1] *
                                         self.scale)
+
+    def resize_canvas(self, new_size):
+        self.surface_size = new_size
+        self.surface = pygame.Surface(self.surface_size, pygame.SRCALPHA)
+        self.reset_surface_rect()
+        self.canvas.resize(new_size)
 
     def repos_surface_rect(self, new_pos):
         self.surface_rect.topleft = new_pos
@@ -181,11 +183,6 @@ class CanvasManager:
                 if value:
                     self.draw_size = int(value)
 
-            if self.rotate_angle_selection:
-                angle = self.rotate_angle_slider.handle_event(mouse_pos, event, [0, 0])
-                if angle:
-                    self.rotate_angle = int(angle)
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.get_options_inputs(selected)
                 if event.button == 1:
@@ -193,10 +190,8 @@ class CanvasManager:
                         self.canvas_operations["pencil"] = True
                         self.cursor.selected_cursor = 'handwriting'
                         self.draw_size_selection = True
-                        self.rotate_angle_selection = False
                     elif selected == "eraser":
                         self.canvas_operations["eraser"] = True
-                        self.rotate_angle_selection = False
                     elif selected == "line":
                         if not self.canvas_operations["line"]:
                             self.canvas_operations["line"] = True
@@ -204,7 +199,6 @@ class CanvasManager:
                             self.preview = frame.surface.copy()
                             self.preview.set_colorkey(self.surface_color)
                             self.draw_size_selection = True
-                            self.rotate_angle_selection = False
                     elif selected == "rectangle":
                         if not self.canvas_operations["rectangle"]:
                             self.canvas_operations["rectangle"] = True
@@ -212,7 +206,6 @@ class CanvasManager:
                             self.preview = frame.surface.copy()
                             self.preview.set_colorkey(self.surface_color)
                             self.draw_size_selection = True
-                            self.rotate_angle_selection = False
                     elif selected == "circle":
                         pass
                         self.rotate_angle_selection = False
@@ -231,12 +224,15 @@ class CanvasManager:
                         get_pixel(frame)
                     elif selected == "rotate left 90 degree":
                         self.canvas_operations["rotate selection left"] = True
-                        self.rotate_angle_selection = True
                         self.draw_size_selection = False
                     elif selected == "rotate right 90 degree":
                         self.canvas_operations["rotate selection right"] = True
-                        self.rotate_angle_selection = True
                         self.draw_size_selection = False
+                    # elif selected == 'resize canvas':
+                    #     new_size = ask_width_height(self.surface_size)
+                    #     self.surface_size = new_size
+                        # self.canvas.resize(new_size)
+                        # self.reset_surface_rect()
 
                 elif event.button == 3:
                     self.canvas_operations["eraser"] = True
@@ -327,8 +323,6 @@ class CanvasManager:
         if self.draw_size_selection:
             self.draw_size_slider.draw(self.options_surface, (0, 0))
 
-        if self.rotate_angle_selection:
-            self.rotate_angle_slider.draw(self.options_surface, (0, 0))
 
     def display_surface(self, selected, color, mouse_pos, events = None):
         self.surface.fill(self.surface_color)

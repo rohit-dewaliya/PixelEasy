@@ -18,9 +18,11 @@ class MenuManager:
         self.display_pos = display_pos
         self.canvas_screen = canvas_screen
         self.text = Font('small_font.png', (255, 255, 255), 2)
-        self.button_names = ['pencil', 'eraser', 'rotate left 90 degree', 'rotate right 90 degree', 'canvas move',
-                             'move', 'rectangle', 'line', 'undo', 'redo', 'circle', 'fill paint', 'selection',
-                             'flip horizontally', 'flip vertically', 'resize canvas', 'export', 'import', 'save',
+        self.button_names =  ['pencil', 'eraser', 'line', 'rectangle', 'circle', 'fill paint',
+                             'selection', 'move', 'rotate left 90 degree', 'rotate right 90 degree',
+                             'flip horizontally', 'flip vertically', 'resize canvas',
+                             'undo', 'redo',
+                             'import', 'export', 'save',
                              'setting', 'exit']
         self.scroll = [0, 0]
         self.offset = 2

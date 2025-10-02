@@ -25,7 +25,7 @@ class HistoryManager:
             snapshot = copy.deepcopy(state)
             self.redo_stack.append(snapshot)
             snapshot = self.undo_stack.pop()
-            print(snapshot, end="\n\n\n")
+            return snapshot.copy()
         return state.copy()
 
     def redo(self, state):
