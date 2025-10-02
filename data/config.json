@@ -1,6 +1,6 @@
 {
     "Cursor Theme": {
-        "type": "dropdown",
+        "type": "radio",
         "options": [
             "dark",
             "light"

@@ -112,7 +112,7 @@ class Game:
 
             text_width = self.configure_text.get_width(name, 5)
 
-            if values['type'] == 'dropdown':
+            if values['type'] == 'radio':
                 radio_group_x = self.CONFIG_DISPLAY_SIZE[0] - 200  # text_x + text_width + (offset_width - text_width)
                 radio_group_y = pos_y + (self.configure_text.image_height - button_size) // 2
 
@@ -224,7 +224,6 @@ class Game:
                         button.color = color
                         button.recolor_foreground(color)
                         _input[-1] = (*color, button.alpha)
-                        print(_input)
 
             for name, _input in radio_groups.items():
                 if _input is None:
