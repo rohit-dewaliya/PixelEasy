@@ -5,6 +5,7 @@ from tkinter import colorchooser
 
 from pygame.locals import *
 
+from data.scripts.surfaces.frame_manager import FrameManager
 from data.scripts.tools.file_manager import write_json_file
 from data.scripts.tools.image_functions import scale_image_size, load_image
 from data.scripts.surfaces.color_palette_manager import ColorPaletteManager
@@ -15,7 +16,7 @@ from data.scripts.ui.button import ColorChooseButton, TextButton
 from data.scripts.tools.font import Font
 from data.scripts.ui.cursor import Cursor
 from data.scripts.history_manager import HistoryManager
-from data.scripts.surfaces.resize_window import ask_width_height
+from data.scripts.surfaces.pop_up_windows import ask_width_height
 
 pygame.init()
 
@@ -27,6 +28,14 @@ class Game:
         self.menu_manager = None
         self.canvas_manager = None
         self.history_manager = HistoryManager()
+        self.frame_manager = None
+
+        self.menu_buttons = ['pencil', 'eraser', 'line', 'rectangle', 'circle', 'fill paint',
+                             'selection', 'move', 'rotate left 90 degree', 'rotate right 90 degree',
+                             'flip horizontally', 'flip vertically', 'resize canvas',
+                             'undo', 'redo',
+                             'import', 'export', 'save',
+                             'setting', 'exit']
 
         self.cursor = Cursor(cursor_size=(16, 16))
 
@@ -81,7 +90,8 @@ class Game:
                                                       self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
 
         if not self.menu_manager:
-            self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
+            self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY,
+                self.menu_buttons)
         else:
             self.menu_manager.reset_displays(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
 
@@ -89,6 +99,11 @@ class Game:
             self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS, self.cursor, self.history_manager)
         else:
             self.canvas_manager.reset_display(self.CANVAS_DISPLAY, self.CANVAS_POS)
+
+        if not self.frame_manager:
+            self.frame_manager = FrameManager(self.FRAME_DISPLAY, self.FRAME_POS, self.canvas_manager.canvas)
+        else:
+            self.frame_manager.reset_display(self.FRAME_DISPLAY, self.FRAME_POS)
 
     def configure_setting(self):
         from data.scripts.tools.file_manager import read_json_file, write_json_file
@@ -303,6 +318,7 @@ class Game:
                 self.menu_manager.display_buttons(mouse_pos, events)
                 self.canvas_manager.display_surface(self.menu_manager.selected_button, self.color_palette_manager.selected_color,
                                                     mouse_pos, events)
+                self.frame_manager.display_components(mouse_pos, events)
 
                 if self.menu_manager.selected_button == "setting":
                     self.setting_screen()
@@ -313,7 +329,8 @@ class Game:
                     self.redo()
                 elif self.menu_manager.selected_button == "resize canvas":
                     new_size = ask_width_height(self.canvas_manager.surface_size)
-                    self.canvas_manager.resize_canvas(new_size)
+                    if new_size:
+                        self.canvas_manager.resize_canvas(new_size)
                     self.menu_manager.selected_button = "pencil"
 
                 for event in events:

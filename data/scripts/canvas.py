@@ -1,5 +1,6 @@
 import pygame
 
+
 class Frame:
     def __init__(self, surface_size):
         self.surface_size = surface_size
@@ -29,9 +30,11 @@ class Frame:
         self.surface_size = new_size
         self.surface = new_surface
 
+
 class Layer:
-    def __init__(self, surface_size):
+    def __init__(self, surface_size, name = "main"):
         self.surface_size = surface_size
+        self.name = name
         self.frames = [Frame(surface_size)]
         self.selected_frame = 0
 
@@ -66,10 +69,11 @@ class Layer:
         new_layer.selected_frame = self.selected_frame
         return new_layer
 
+
 class Canvas:
     def __init__(self, surface_size):
         self.surface_size = surface_size
-        self.image = [Layer(self.surface_size)]
+        self.image = [Layer(self.surface_size, "main")]
         self.selected_layer = 0
 
     @property
@@ -80,12 +84,16 @@ class Canvas:
         self.image = [Layer(self.surface_size)]
         self.selected_layer = 0
 
-    def add_layer(self, layer = None):
+    def add_layer(self, name = "", layer=None):
         if layer:
             self.image.append(layer)
         else:
             width, height = self.image[0].surface_size
-            self.image.append(Layer((width, height)))
+            new_layer = Layer((width, height), name)
+            len_frame = self.image[0].total_frames
+            for i in range(len_frame - 1):
+                new_layer.add_frame()
+            self.image.append(new_layer)
         self.selected_layer = self.total_layers - 1
 
     def remove_layer(self, layer_index):
@@ -103,6 +111,14 @@ class Canvas:
         self.surface_size = new_size
         for layer in self.image:
             layer.resize(new_size)
+
+    def move_layer_up(self, layer_index):
+        if layer_index > 0:
+            self.image[layer_index - 1], self.image[layer_index] = self.image[layer_index], self.image[layer_index - 1]
+
+    def move_layer_down(self, layer_index):
+        if layer_index < len(self.image) - 1:
+            self.image[layer_index + 1], self.image[layer_index] = self.image[layer_index], self.image[layer_index + 1]
 
     def copy(self):
         new_canvas = Canvas(self.surface_size)

@@ -139,11 +139,12 @@ class ColorChooseButton(Button):
         return clicked
 
 class IconButton(Button):
-    def __init__(self, x, y, width, height, image):
+    def __init__(self, x, y, width, height, image, tooltop_offset = (0, 0)):
         super().__init__(x, y, width, height)
         self.image = load_image("icons/" + image + ".png")
         self.image_name = image.replace("_", " ")
         self.text_width = tooltip_text.get_width(self.image_name, 5)
+        self.tooltip_offset = tooltop_offset
         self.image_size = self.image.get_size()
         self.bg = scale_image_size(icon_background, width, height)
         self.bg_hover = scale_image_size(icon_background_hover, self.width, self.height)
@@ -165,8 +166,8 @@ class IconButton(Button):
                                                         self.height], 2)
 
             if tooltip_display:
-                pos = [tooltip_display.get_width() - self.tooltip_size[0] + self.x - scroll[0], self.y - scroll[1] + (
-                    self.bg_size[1] - self.tooltip_size[1]) // 2]
+                pos = [tooltip_display.get_width() - self.tooltip_size[0] + self.x - scroll[0] - self.tooltip_offset[
+                    0], self.y - scroll[1] + (self.bg_size[1] - self.tooltip_size[1]) // 2 - self.tooltip_offset[1]]
                 tooltip_display.blit(self.tooltip_bg, pos)
                 tooltip_text.display_fonts(tooltip_display, self.image_name, [pos[0] + self.tooltip_offset_text[0] // 2,
                                                     pos[1] + self.tooltip_offset_text[1] // 2], 5)
