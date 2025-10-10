@@ -86,23 +86,12 @@ class CanvasManager:
         self.rotate_angle_selection = False
 
 
-        self.options_surface_size = [220, self.slider_size[1] + 30]
+        self.options_surface_size = [200, self.slider_size[1] + 30]
         self.options_surface = pygame.Surface(self.options_surface_size)
         self.slider_pos = [20, (self.options_surface_size[1] - self.slider_size[1]) // 2]
 
-        self.draw_size_slider = Slider(*self.slider_pos, self.slider_size[0], self.slider_size[1], 0, 50,
+        self.draw_size_slider = Slider(*self.slider_pos, self.slider_size[0], self.slider_size[1], 0, 25,
                                        self.draw_size)
-        self.rotate_angle_slider = Slider(*self.slider_pos, self.slider_size[0], self.slider_size[1], -180, 180,
-                                          self.rotate_angle)
-
-    def get_options_inputs(self, selected):
-        if selected in ['pencil', 'eraser', 'line', 'rectangle']:
-            self.options_surface_size = [220, self.slider_size[1] + 30]
-            self.options_surface = pygame.Surface(self.options_surface_size)
-
-        if selected in ['rotate']:
-            self.options_surface_size = [220, self.slider_size[1] + 30]
-            self.options_surface = pygame.Surface(self.options_surface_size)
 
     def reset_display(self, display, display_pos):
         self.display = display
@@ -206,7 +195,6 @@ class CanvasManager:
                     self.draw_size = int(value)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.get_options_inputs(selected)
                 if event.button == 1:
                     if selected == "pencil":
                         self.canvas_operations["pencil"] = True

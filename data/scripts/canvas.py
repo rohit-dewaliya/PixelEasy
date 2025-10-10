@@ -32,22 +32,34 @@ class Frame:
 
 
 class Layer:
+    instances = []
+
     def __init__(self, surface_size, name = "main"):
         self.surface_size = surface_size
         self.name = name
         self.frames = [Frame(surface_size)]
         self.selected_frame = 0
+        self.hide = False
+
+        Layer.instances.append(self)
 
     @property
     def total_frames(self):
         return len(self.frames)
 
+    @classmethod
+    def reset_frames(cls, frame_number):
+        for instance in cls.instances:
+            instance.selected_frame = frame_number
+
+    @classmethod
+    def add_frames_to_all_layers(cls):
+        for instance in cls.instances:
+            width, height = instance.frames[0].surface_size
+            instance.frames.append(Frame((width, height)))
+
     def add_frame(self, frame=None):
-        if frame:
-            self.frames.append(frame.copy())
-        else:
-            width, height = self.frames[0].surface_size
-            self.frames.append(Frame((width, height)))
+        Layer.add_frames_to_all_layers()
         self.selected_frame = self.total_frames - 1
 
     def remove_frames(self, frame_index):
@@ -75,10 +87,14 @@ class Canvas:
         self.surface_size = surface_size
         self.image = [Layer(self.surface_size, "main")]
         self.selected_layer = 0
+        self.selected_frame = 0
 
     @property
     def total_layers(self):
         return len(self.image)
+
+    def set_frames(self, frame_number):
+        Layer.reset_frames(frame_number)
 
     def create_new_image(self):
         self.image = [Layer(self.surface_size)]
@@ -92,9 +108,10 @@ class Canvas:
             new_layer = Layer((width, height), name)
             len_frame = self.image[0].total_frames
             for i in range(len_frame - 1):
-                new_layer.add_frame()
+                new_layer.frames.append(Frame((width, height)))
             self.image.append(new_layer)
         self.selected_layer = self.total_layers - 1
+        self.set_frames(self.image[0].selected_frame)
 
     def remove_layer(self, layer_index):
         if self.total_layers > 1 and 0 <= layer_index < self.total_layers:
@@ -104,7 +121,8 @@ class Canvas:
     def render(self):
         final_surface = pygame.Surface(self.surface_size, pygame.SRCALPHA)
         for layer in self.image:
-            final_surface.blit(layer.get_active_frame().surface, (0, 0))
+            if not layer.hide:
+                final_surface.blit(layer.get_active_frame().surface, (0, 0))
         return final_surface
 
     def resize(self, new_size):

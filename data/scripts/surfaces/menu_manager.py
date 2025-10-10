@@ -1,7 +1,7 @@
 import pygame
 
 from data.scripts.tools.font import Font
-from data.scripts.ui.button import IconButton
+from data.scripts.ui.button import IconButtonWithTooltip
 
 
 def demo_functions():
@@ -46,7 +46,7 @@ class MenuManager:
         y = 0
         size = [50, 50]
         for name in self.button_names:
-            self.menu_buttons[name] = IconButton(0, y, size[0], size[1], name, self.tooltip_offset)
+            self.menu_buttons[name] = IconButtonWithTooltip(0, y, size[0], size[1], name, self.tooltip_offset)
             y += size[1] + self.offset
 
     def display_buttons(self, mouse_pos, events):

@@ -139,6 +139,77 @@ class ColorChooseButton(Button):
         return clicked
 
 class IconButton(Button):
+    def __init__(self, x, y, width, height, image):
+        super().__init__(x, y, width, height)
+        self.image = scale_image_size(load_image("icons/" + image + ".png"), width, height)
+        self.image_name = image.replace("_", " ")
+        self.image_size = self.image.get_size()
+        self.bg = scale_image_size(icon_background, width, height)
+        self.bg_hover = scale_image_size(icon_background_hover, self.width, self.height)
+        self.bg_size = [width, height]
+        self.offset = [(self.bg_size[0] - self.image_size[0]) // 2, (self.bg_size[1] - self.image_size[1]) // 2]
+        self.border_image = add_border(self.image)
+
+    def display(self, display, surface_hover, mouse_pos, events, scroll=(0, 0)):
+        match = False
+        if self.hover(mouse_pos, scroll) and surface_hover:
+            if self.click(mouse_pos, events, scroll):
+                match = True
+            display.blit(self.bg_hover, [self.x - scroll[0], self.y - scroll[1], self.width, self.height])
+            pygame.draw.rect(display, (255, 255, 255), [self.x - scroll[0], self.y - scroll[1], self.width,
+                                                        self.height], 2)
+
+        else:
+            display.blit(self.bg, [self.x - scroll[0], self.y - scroll[1], self.width, self.height])
+        display.blit(self.image, [self.x + self.offset[0] - scroll[0], self.y + self.offset[1] - scroll[1]])
+        return match
+
+
+class CircleButton(Button):
+    def __init__(self, x, y, radius, circle_color = (255, 255, 255), circle_hover_color = (255, 255, 0)):
+        super().__init__(x, y, radius, radius)
+        self.radius = radius
+        self.circle_color = circle_color
+        self.circle_hover_color = circle_hover_color
+
+    def display(self, display, surface_hover, mouse_pos, events, scroll=(0, 0)):
+        match = False
+        if self.hover(mouse_pos, scroll) and surface_hover:
+            if self.click(mouse_pos, events, scroll):
+                match = True
+            pygame.draw.circle(display, self.circle_hover_color, (self.x + self.radius // 2 - scroll[0],
+                      self.y + self.radius // 2 - scroll[1]), self.radius // 2)
+        else:
+            pygame.draw.circle(display, self.circle_color, (self.x + self.radius // 2 - scroll[0],
+                      self.y + self.radius // 2 - scroll[1]), self.radius // 2)
+        return match
+
+class SurfaceButton(Button):
+    def __init__(self, x, y, width, height, frame):
+        super().__init__(x, y, width, height)
+        self.frame = frame
+        self.surface_color = (255, 255, 255)
+        self.surface = pygame.Surface((self.width, self.height))
+
+    def display(self, display, surface_hover, mouse_pos, events, scroll=(0, 0)):
+        match = False
+        self.surface.fill(self.surface_color)
+        if self.hover(mouse_pos, scroll) and surface_hover:
+            if self.click(mouse_pos, events, scroll):
+                match = True
+            pygame.draw.line(display, (200, 200, 0), (self.x + self.height, self.y - scroll[1]), (self.x + self.width,
+                                                                                      self.y + self.width - scroll[
+                                                                                                      1]), 4)
+        else:
+            pygame.draw.line(display, (150, 0, 0), (self.x + self.height, self.y - scroll[1]), (self.x + self.width,
+                                                                                      self.y + self.width - scroll[
+                                                                                                      1]), 2)
+        self.surface.blit(pygame.transform.scale(self.frame.surface, (self.width, self.height)))
+        display.blit(self.surface, [self.x - scroll[0], self.y - scroll[1]])
+        return match
+
+
+class IconButtonWithTooltip(Button):
     def __init__(self, x, y, width, height, image, tooltop_offset = (0, 0)):
         super().__init__(x, y, width, height)
         self.image = load_image("icons/" + image + ".png")
