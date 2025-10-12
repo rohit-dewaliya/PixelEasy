@@ -38,11 +38,12 @@ def rotate_rect_90_from_center(rect):
 
 
 class CanvasManager:
-    def __init__(self, display, display_pos, cursor, history_manager, surface_size = [32, 32], scale = 2, max_scale =
-    3, min_scale =1):
+    def __init__(self, display, display_pos, cursor, history_manager, error_manager, surface_size = [32, 32],
+                 scale = 2, max_scale = 3, min_scale =1):
         self.display = display
         self.display_size = self.display.get_size()
         self.display_pos = display_pos
+        self.error_manager = error_manager
         self.cursor = cursor
 
         self.history_manager = history_manager
@@ -196,6 +197,12 @@ class CanvasManager:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    # if selected in ['flip horizontally', 'flip vertically', 'rotate left 90 degree', 'rotate right 90 degree']:
+                    #     print('y', self.canvas_operations)
+                    #     if self.canvas_operations['selection']:
+                    #         self.canvas_operations['selection'] = False
+                    #         print('hello')
+                    #         continue
                     if selected == "pencil":
                         self.canvas_operations["pencil"] = True
                         self.cursor.selected_cursor = 'handwriting'
@@ -233,6 +240,7 @@ class CanvasManager:
                     elif selected == "selection":
                         if not self.canvas_operations["selection"]:
                             self.canvas_operations["selection"] = True
+                            print('y', self.canvas_operations)
                             self.drawing_fixed_pos = x, y
                             self.preview = frame.surface.copy()
                             self.preview.set_colorkey(self.surface_color)
@@ -251,11 +259,9 @@ class CanvasManager:
                         # get_pixel(frame.surface, (x, y), color)
                     elif selected == "rotate left 90 degree":
                         self.canvas_operations["rotate selection left"] = True
-                        self.draw_size_selection = False
                         self.canvas_operations["fill paint"] = False
                     elif selected == "rotate right 90 degree":
                         self.canvas_operations["rotate selection right"] = True
-                        self.draw_size_selection = False
                         self.canvas_operations["fill paint"] = False
 
                 elif event.button == 3:

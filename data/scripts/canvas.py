@@ -55,8 +55,8 @@ class Layer:
     @classmethod
     def add_frames_to_all_layers(cls):
         for instance in cls.instances:
-            width, height = instance.frames[0].surface_size
-            instance.frames.append(Frame((width, height)))
+            frame = instance.frames[-1].copy()
+            instance.frames.append(frame)
 
     def add_frame(self, frame=None):
         Layer.add_frames_to_all_layers()

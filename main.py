@@ -5,6 +5,7 @@ from tkinter import colorchooser
 
 from pygame.locals import *
 
+from data.scripts.error_message_shower import ErrorMessageManager
 from data.scripts.surfaces.frame_manager import FrameManager
 from data.scripts.tools.file_manager import write_json_file
 from data.scripts.tools.image_functions import scale_image_size, load_image
@@ -23,12 +24,14 @@ pygame.init()
 
 class Game:
     def __init__(self):
+        # self.size = [1300, 800]
         self.MIN_SCREEN_SIZE = [800, 500]
         self.color_palette_manager = None
         self.menu_manager = None
         self.canvas_manager = None
         self.history_manager = HistoryManager()
         self.frame_manager = None
+        self.error_manager = None
 
         self.menu_buttons = ['pencil', 'eraser', 'line', 'rectangle', 'circle', 'fill paint',
                              'selection', 'move', 'rotate left 90 degree', 'rotate right 90 degree',
@@ -81,6 +84,11 @@ class Game:
         self.CANVAS_DISPLAY = pygame.Surface(self.CANVAS_SIZE)
         self.CONFIG_DISPLAY = pygame.Surface(self.CONFIG_DISPLAY_SIZE)
 
+        if not self.error_manager:
+            self.error_manager = ErrorMessageManager(self.SCREEN, self.SCREEN_SIZE)
+        else:
+            self.error_manager.reset_screen(self.SCREEN_SIZE)
+
         if not self.color_palette_manager:
             self.color_palette_manager = ColorPaletteManager(self.COLOR_PALETTE_DISPLAY, self.COLOR_PALETTE_POS,
                                                              self.COLOR_PALETTE_COLORS_DISPLAY,
@@ -90,47 +98,41 @@ class Game:
                                                       self.COLOR_PALETTE_COLORS_DISPLAY, self.COLOR_PALETTE_COLORS_POS)
 
         if not self.menu_manager:
-            self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY,
-                self.menu_buttons)
+            self.menu_manager = MenuManager(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY, self.menu_buttons)
         else:
             self.menu_manager.reset_displays(self.MENU_DISPLAY, self.MENU_POS, self.CANVAS_DISPLAY)
 
         if not self.canvas_manager:
-            self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS, self.cursor, self.history_manager)
+            self.canvas_manager = CanvasManager(self.CANVAS_DISPLAY, self.CANVAS_POS, self.cursor,
+                                                self.history_manager, self.error_manager)
         else:
             self.canvas_manager.reset_display(self.CANVAS_DISPLAY, self.CANVAS_POS)
 
         if not self.frame_manager:
-            self.frame_manager = FrameManager(self.FRAME_DISPLAY, self.FRAME_POS, self.canvas_manager.canvas)
+            self.frame_manager = FrameManager(self.FRAME_DISPLAY, self.FRAME_POS, self.canvas_manager.canvas,
+                                              self.error_manager)
         else:
             self.frame_manager.reset_display(self.FRAME_DISPLAY, self.FRAME_POS)
 
     def configure_setting(self):
-        from data.scripts.tools.file_manager import read_json_file, write_json_file
+        from data.scripts.tools.file_manager import read_json_file
 
         self.config_data = read_json_file('data/config.json')
-        configure_data = {}
 
         pos_y = 50
-        option_dis = 80
         text_x = 50
         button_size = 40
         slider_size = [150, 10]
-        offset_width = self.configure_text.get_width("a" * 60, 5)
         sliders = {}
         radio_groups = {}
 
         for key, values in self.config_data.items():
             name = key
             _input = None
-            slider = None
-            rect = None
             distance = 0
 
-            text_width = self.configure_text.get_width(name, 5)
-
             if values['type'] == 'radio':
-                radio_group_x = self.CONFIG_DISPLAY_SIZE[0] - 200  # text_x + text_width + (offset_width - text_width)
+                radio_group_x = self.CONFIG_DISPLAY_SIZE[0] - 200
                 radio_group_y = pos_y + (self.configure_text.image_height - button_size) // 2
 
                 radio_group = RadioButtonGroup(values['options'], radio_group_x, radio_group_y,
@@ -143,7 +145,7 @@ class Game:
                 distance = radio_group.height + 50
 
             if values['type'] == 'color':
-                button_x = self.CONFIG_DISPLAY_SIZE[0] - 200 # text_x + text_width + (offset_width - text_width)
+                button_x = self.CONFIG_DISPLAY_SIZE[0] - 200
                 button_y = pos_y + (self.configure_text.image_height - button_size) // 2
 
                 slider_x = button_x - (slider_size[0] - button_size) // 2
@@ -332,6 +334,15 @@ class Game:
                     if new_size:
                         self.canvas_manager.resize_canvas(new_size)
                     self.menu_manager.selected_button = "pencil"
+                if self.menu_manager.selected_button in ['flip horizontally', 'flip vertically', 'rotate left 90 degree',
+                                'rotate right 90 degree']:
+                    if not self.canvas_manager.canvas_operations['selection']:
+                        message = f"Select the area before {self.menu_manager.selected_button}"
+                        print(message)
+                        self.error_manager.add_error(message)
+                        self.canvas_manager.canvas_operations[self.menu_manager.selected_button] = False
+                        self.canvas_manager.canvas_operations['pencil'] = True
+                        self.menu_manager.selected_button = 'pencil'
 
                 for event in events:
                     if event.type == QUIT:
@@ -381,6 +392,7 @@ class Game:
                     elif event.type == VIDEORESIZE:
                         self.screen_size(list(event.size))
 
+
                 self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_DISPLAY, *self.COLOR_PALETTE_SIZE),
                                  self.COLOR_PALETTE_POS)
                 self.SCREEN.blit(scale_image_size(self.COLOR_PALETTE_COLORS_DISPLAY, *self.COLOR_PALETTE_COLORS_SIZE),
@@ -390,6 +402,7 @@ class Game:
                 self.SCREEN.blit(scale_image_size(self.MENU_DISPLAY, *self.MENU_SIZE), self.MENU_POS)
                 self.cursor.display_cursor(self.SCREEN, mouse_pos)
 
+                self.error_manager.display_errors()
                 pygame.display.flip()
                 self.CLOCK.tick(self.FPS)
         except KeyboardInterrupt:
@@ -397,8 +410,6 @@ class Game:
         finally:
             pygame.quit()
 
-
 if __name__ == "__main__":
     game = Game()
-    # game.setting_screen()
     game.main()

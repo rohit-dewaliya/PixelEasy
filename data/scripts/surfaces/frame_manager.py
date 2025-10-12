@@ -1,5 +1,4 @@
 import pygame
-from pygame.geometry import Circle
 
 from data.scripts.surfaces.menu_manager import MenuManager
 from data.scripts.surfaces.pop_up_windows import ask_layer_name
@@ -96,10 +95,11 @@ class SurfaceButtons:
 
 
 class FrameManager:
-    def __init__(self, display, display_pos, canvas):
+    def __init__(self, display, display_pos, canvas, error_manager):
         self.display = display
         self.display_pos = display_pos
         self.display_size = display.get_size()
+        self.error_manager = error_manager
 
         self.canvas = canvas
 
@@ -139,7 +139,6 @@ class FrameManager:
         self.add_layer_rect()
 
     def add_layer_rect(self):
-        selected_frame = self.canvas.image[0].selected_frame
         self.layer_background_rects = []
         self.layer_menu_buttons = []
         self.layer_frames = []
