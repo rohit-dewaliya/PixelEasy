@@ -40,6 +40,7 @@ class Layer:
         self.frames = [Frame(surface_size)]
         self.selected_frame = 0
         self.hide = False
+        self.frame = 0
 
         Layer.instances.append(self)
 
@@ -57,6 +58,7 @@ class Layer:
         for instance in cls.instances:
             frame = instance.frames[-1].copy()
             instance.frames.append(frame)
+
 
     def add_frame(self, frame=None):
         Layer.add_frames_to_all_layers()
@@ -87,6 +89,7 @@ class Canvas:
         self.surface_size = surface_size
         self.image = [Layer(self.surface_size, "main")]
         self.selected_layer = 0
+        self.frame_speed = 0
         self.selected_frame = 0
 
     @property
@@ -120,6 +123,12 @@ class Canvas:
         error_manager.add_error("Can't remove this layer. One layer needs to be remain.")
 
     def render(self):
+        if self.frame_speed > 0:
+            self.selected_frame = self.selected_frame + self.frame_speed
+            if self.selected_frame > self.image[0].total_frames:
+                Layer.reset_frames(0)
+                self.selected_frame = 0
+            Layer.reset_frames(int(self.selected_frame))
         final_surface = pygame.Surface(self.surface_size, pygame.SRCALPHA)
         for layer in self.image:
             if not layer.hide:
