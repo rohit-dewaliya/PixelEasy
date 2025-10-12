@@ -9,7 +9,7 @@ background = load_image('background.png', 100)
 
 class ErrorMessage:
     instances = []
-    def __init__(self, text, screen_size, time = 5000):
+    def __init__(self, text, screen_size, time = 2000):
         self.text = text
         self.text_pos = [30, 5]
         self.text_size = [fonts.get_width(self.text, 5), fonts.image_height]

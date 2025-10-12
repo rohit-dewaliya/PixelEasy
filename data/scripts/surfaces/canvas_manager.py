@@ -240,7 +240,6 @@ class CanvasManager:
                     elif selected == "selection":
                         if not self.canvas_operations["selection"]:
                             self.canvas_operations["selection"] = True
-                            print('y', self.canvas_operations)
                             self.drawing_fixed_pos = x, y
                             self.preview = frame.surface.copy()
                             self.preview.set_colorkey(self.surface_color)
@@ -256,7 +255,6 @@ class CanvasManager:
                         if self.canvas_operations["fill paint"] and self.surface_rect.collidepoint(mouse_pos):
                             flood_fill(frame.surface, (x, y), color)
                         self.canvas_operations["fill paint"] = True
-                        # get_pixel(frame.surface, (x, y), color)
                     elif selected == "rotate left 90 degree":
                         self.canvas_operations["rotate selection left"] = True
                         self.canvas_operations["fill paint"] = False
@@ -318,7 +316,7 @@ class CanvasManager:
             rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
             rect.normalize()
             pygame.draw.rect(self.preview, (255, 0, 255, 100), rect, 1)
-        if self.canvas_selection:
+        if self.canvas_selection and self.selection_rect:
             if self.canvas_operations["flip horizontally"]:
                 selected_surface = frame.surface.subsurface(self.selection_rect).copy()
                 flipped_surface = pygame.transform.flip(selected_surface, True, False)

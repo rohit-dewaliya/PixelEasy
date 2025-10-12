@@ -113,10 +113,11 @@ class Canvas:
         self.selected_layer = self.total_layers - 1
         self.set_frames(self.image[0].selected_frame)
 
-    def remove_layer(self, layer_index):
+    def remove_layer(self, layer_index, error_manager):
         if self.total_layers > 1 and 0 <= layer_index < self.total_layers:
             self.image.pop(layer_index)
             self.selected_layer = self.total_layers - 1
+        error_manager.add_error("Can't remove this layer. One layer needs to be remain.")
 
     def render(self):
         final_surface = pygame.Surface(self.surface_size, pygame.SRCALPHA)
@@ -130,13 +131,17 @@ class Canvas:
         for layer in self.image:
             layer.resize(new_size)
 
-    def move_layer_up(self, layer_index):
+    def move_layer_up(self, layer_index, error_manager):
         if layer_index > 0:
             self.image[layer_index - 1], self.image[layer_index] = self.image[layer_index], self.image[layer_index - 1]
+        else:
+            error_manager.add_error("Can't move this layer up.")
 
-    def move_layer_down(self, layer_index):
+    def move_layer_down(self, layer_index, error_manager):
         if layer_index < len(self.image) - 1:
             self.image[layer_index + 1], self.image[layer_index] = self.image[layer_index], self.image[layer_index + 1]
+        else:
+            error_manager.add_error("Can't move this layer down.")
 
     def copy(self):
         new_canvas = Canvas(self.surface_size)

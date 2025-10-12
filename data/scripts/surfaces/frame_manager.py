@@ -216,18 +216,19 @@ class FrameManager:
             menu_buttons.display_buttons(self.display, mouse_pos, events, self.scroll)
 
             if menu_buttons.selected_button == "cancel":
-                delete_index = layer_index
+                delete_index = layer_index + 1
             elif menu_buttons.selected_button == "up arrow":
-                self.canvas.move_layer_up(layer_index)
+                self.canvas.move_layer_up(layer_index, self.error_manager)
             elif menu_buttons.selected_button == "down arrow":
-                self.canvas.move_layer_down(layer_index)
+                self.canvas.move_layer_down(layer_index, self.error_manager)
 
             menu_buttons.selected_button = None
 
             layer_frames.display_buttons(self.display, mouse_pos, layer.selected_frame, events, self.scroll, self.canvas.set_frames)
 
         if delete_index:
-            self.canvas.remove_layer(delete_index)
+            delete_index -= 1
+            self.canvas.remove_layer(delete_index, self.error_manager)
             delete_index = None
 
     def display_components(self, mouse_pos, events, scroll=(0, 0)):
@@ -252,5 +253,9 @@ class FrameManager:
             self.canvas.image[self.canvas.selected_layer].add_frame()
             self.menu_manager.selected_button = None
             self.add_layer_rect()
+        elif self.menu_manager.selected_button == "play animation":
+            pass
+        elif self.menu_manager.selected_button == "pause animation":
+            pass
 
         self.display.blit(self.button_surface, self.button_surface_pos)

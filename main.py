@@ -336,9 +336,8 @@ class Game:
                     self.menu_manager.selected_button = "pencil"
                 if self.menu_manager.selected_button in ['flip horizontally', 'flip vertically', 'rotate left 90 degree',
                                 'rotate right 90 degree']:
-                    if not self.canvas_manager.canvas_operations['selection']:
+                    if not self.canvas_manager.selection_rect:
                         message = f"Select the area before {self.menu_manager.selected_button}"
-                        print(message)
                         self.error_manager.add_error(message)
                         self.canvas_manager.canvas_operations[self.menu_manager.selected_button] = False
                         self.canvas_manager.canvas_operations['pencil'] = True
