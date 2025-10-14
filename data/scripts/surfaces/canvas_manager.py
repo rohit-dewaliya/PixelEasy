@@ -197,12 +197,6 @@ class CanvasManager:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    # if selected in ['flip horizontally', 'flip vertically', 'rotate left 90 degree', 'rotate right 90 degree']:
-                    #     print('y', self.canvas_operations)
-                    #     if self.canvas_operations['selection']:
-                    #         self.canvas_operations['selection'] = False
-                    #         print('hello')
-                    #         continue
                     if selected == "pencil":
                         self.canvas_operations["pencil"] = True
                         self.cursor.selected_cursor = 'handwriting'
@@ -232,9 +226,12 @@ class CanvasManager:
                         self.canvas_selection = False
                         self.canvas_operations["fill paint"] = False
                     elif selected == "circle":
-                        pass
-                        self.rotate_angle_selection = False
-                        self.draw_size_selection = True
+                        if not self.canvas_operations["circle"]:
+                            self.canvas_operations["circle"] = True
+                            self.drawing_fixed_pos = x, y
+                            self.preview = frame.surface.copy()
+                            self.preview.set_colorkey(self.surface_color)
+                            self.draw_size_selection = True
                         self.canvas_selection = False
                         self.canvas_operations["fill paint"] = False
                     elif selected == "selection":
@@ -277,6 +274,11 @@ class CanvasManager:
                                            (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
                         rect.normalize()
                         pygame.draw.rect(frame.surface, color, rect, self.draw_size)
+                    if self.canvas_operations["circle"]:
+                        rect = pygame.Rect(self.drawing_fixed_pos,
+                                           (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+                        rect.normalize()
+                        pygame.draw.ellipse(frame.surface, color, rect, self.draw_size)
                     if self.canvas_operations["selection"]:
                         self.canvas_selection = True
                         self.selection_rect = pygame.Rect(self.drawing_fixed_pos,
@@ -286,6 +288,7 @@ class CanvasManager:
                     self.canvas_operations["pencil"] = False
                     self.canvas_operations["line"] = False
                     self.canvas_operations["rectangle"] = False
+                    self.canvas_operations['circle'] = False
                     self.canvas_operations["eraser"] = False
                     self.canvas_operations["selection"] = False
                     self.canvas_operations["flip horizontally"] = False
@@ -311,6 +314,11 @@ class CanvasManager:
             rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
             rect.normalize()
             pygame.draw.rect(self.preview, color, rect, self.draw_size)
+        elif self.canvas_operations["circle"]:
+            self.preview.fill(self.surface_color)
+            rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+            rect.normalize()
+            pygame.draw.ellipse(self.preview, color, rect, self.draw_size)
         elif self.canvas_operations["selection"]:
             self.preview.fill(self.surface_color)
             rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))

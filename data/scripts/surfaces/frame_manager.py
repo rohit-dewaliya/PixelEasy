@@ -256,7 +256,9 @@ class FrameManager:
         elif self.menu_manager.selected_button == "play animation":
             self.canvas.selected_frame = self.canvas.image[0].selected_frame
             self.canvas.frame_speed = 0.1
+            self.menu_manager.selected_button = None
         elif self.menu_manager.selected_button == "pause animation":
             self.canvas.frame_speed = 0
+            self.menu_manager.selected_button = None
 
         self.display.blit(self.button_surface, self.button_surface_pos)

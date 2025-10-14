@@ -9,14 +9,16 @@ background = load_image('background.png', 100)
 
 class ErrorMessage:
     instances = []
-    def __init__(self, text, screen_size, time = 2000):
+    def __init__(self, text, screen_size, time = 2000, type="warning"):
         self.text = text
         self.text_pos = [30, 5]
         self.text_size = [fonts.get_width(self.text, 5), fonts.image_height]
         self.start_time = pygame.time.get_ticks()
         self.time = time
+        self.background_colors = {"warning": (255, 0, 0), "success": (0, 255, 0)}
         self.background_size = [self.text_size[0] + self.text_pos[0] * 2, self.text_size[1] + self.text_pos[1] * 2]
-        self.background = recolor_image(scale_image_size(background, *self.background_size), (255, 0, 0), 100)
+        self.background = recolor_image(scale_image_size(background, *self.background_size), self.background_colors[
+            type],100)
 
         self.reset_screen(screen_size)
 
@@ -50,8 +52,8 @@ class ErrorMessageManager:
         self.screen_size = screen_size
         ErrorMessage.reset_instances(screen_size)
 
-    def add_error(self, message):
-        error = ErrorMessage(message, self.screen_size)
+    def add_error(self, message, type="warning"):
+        error = ErrorMessage(message, self.screen_size, 2000, type)
         self.errors.append(error)
 
     def display_errors(self):

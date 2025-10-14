@@ -1,5 +1,7 @@
 import pygame
 
+from tkinter import filedialog
+
 
 class Frame:
     def __init__(self, surface_size):
@@ -58,7 +60,7 @@ class Layer:
         for instance in cls.instances:
             frame = instance.frames[-1].copy()
             instance.frames.append(frame)
-
+            instance.selected_frame = instance.total_frames - 1
 
     def add_frame(self, frame=None):
         Layer.add_frames_to_all_layers()
@@ -124,7 +126,7 @@ class Canvas:
 
     def render(self):
         if self.frame_speed > 0:
-            self.selected_frame = self.selected_frame + self.frame_speed
+            self.selected_frame += self.frame_speed
             if self.selected_frame > self.image[0].total_frames:
                 Layer.reset_frames(0)
                 self.selected_frame = 0
@@ -157,3 +159,67 @@ class Canvas:
         new_canvas.image = [layer.copy() for layer in self.image]
         new_canvas.selected_layer = self.selected_layer
         return new_canvas
+
+
+def import_image(canvas, error_manager, canvas_surface_resize):
+    try:
+        save_path = filedialog.askopenfilename(
+            title="Import Image",
+            defaultextension=".png",
+            filetypes=(
+                ("Image files", "*.png;*.jpg;*.jpeg"),
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg;*.jpeg"),
+                ("All Files", "*.*")
+            )
+        )
+
+
+        if save_path:
+            image = pygame.image.load(save_path).convert_alpha()
+            image_size = (image.get_width(), image.get_height())
+
+            canvas_surface_resize(image_size)
+
+            layer = canvas.image[canvas.selected_layer]
+            frame = layer.frames[layer.selected_frame]
+            frame.surface.blit(image, (0,0))
+
+            error_manager.add_error("Import complete.", "success")
+
+        if not save_path:
+            error_manager.add_error("Can't export this canvas. Error occured.")
+
+    except Exception as e:
+        error_manager.add_error(f"Export failed: {e}")
+        error_manager.add_error("Export Failed. Can't export this canvas. Error occurred!")
+
+
+def export_canvas(canvas, error_manager):
+    try:
+        save_path = filedialog.asksaveasfilename(
+            title="Import Image",
+            defaultextension=".png",
+            filetypes=(("PNG files", "*.png"), ("All Files", "*.*"))
+        )
+
+        if not save_path:
+            error_manager.add_error("Can't export this canvas. Error occured.")
+
+        total_frames = len(canvas.image[0].frames)
+
+        for frame_index in range(total_frames):
+            final_surface = pygame.Surface(canvas.surface_size, pygame.SRCALPHA)
+
+            for layer in canvas.image:
+                frame = layer.frames[frame_index]
+                final_surface.blit(frame.surface, (0, 0))
+
+            path = save_path.replace(".png", f"_{frame_index + 1}.png")
+            pygame.image.save(final_surface, path)
+
+        error_manager.add_error("Export complete. Canvas exported successfully!", "success")
+
+    except Exception as e:
+        error_manager.add_error(f"Export failed: {e}")
+        error_manager.add_error("Export Failed. Can't export this canvas. Error occurred!")

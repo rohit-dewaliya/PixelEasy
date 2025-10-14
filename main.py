@@ -5,6 +5,7 @@ from tkinter import colorchooser
 
 from pygame.locals import *
 
+from data.scripts.canvas import export_canvas, import_image
 from data.scripts.error_message_shower import ErrorMessageManager
 from data.scripts.surfaces.frame_manager import FrameManager
 from data.scripts.tools.file_manager import write_json_file
@@ -37,7 +38,7 @@ class Game:
                              'selection', 'move', 'rotate left 90 degree', 'rotate right 90 degree',
                              'flip horizontally', 'flip vertically', 'resize canvas',
                              'undo', 'redo',
-                             'import', 'export', 'save',
+                             'import image', 'export images', 'import project file', 'save whole project',
                              'setting', 'exit']
 
         self.cursor = Cursor(cursor_size=(16, 16))
@@ -333,6 +334,12 @@ class Game:
                     new_size = ask_width_height(self.canvas_manager.surface_size)
                     if new_size:
                         self.canvas_manager.resize_canvas(new_size)
+                    self.menu_manager.selected_button = "pencil"
+                elif self.menu_manager.selected_button == "export images":
+                    export_canvas(self.canvas_manager.canvas, self.error_manager)
+                    self.menu_manager.selected_button = "pencil"
+                elif self.menu_manager.selected_button == "import image":
+                    import_image(self.canvas_manager.canvas, self.error_manager, self.canvas_manager.resize_canvas)
                     self.menu_manager.selected_button = "pencil"
                 if self.menu_manager.selected_button in ['flip horizontally', 'flip vertically', 'rotate left 90 degree',
                                 'rotate right 90 degree']:
