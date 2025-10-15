@@ -30,6 +30,7 @@ def write_json_file(path, data, indent=4):
 
 
 def read_file(path):
+    data=""
     if os.path.isfile(path):
         with open(path, 'r') as file:
             data = file.read()

@@ -5,7 +5,7 @@ from tkinter import colorchooser
 
 from pygame.locals import *
 
-from data.scripts.canvas import export_canvas, import_image
+from data.scripts.tools.save import *
 from data.scripts.error_message_shower import ErrorMessageManager
 from data.scripts.surfaces.frame_manager import FrameManager
 from data.scripts.tools.file_manager import write_json_file
@@ -340,6 +340,12 @@ class Game:
                     self.menu_manager.selected_button = "pencil"
                 elif self.menu_manager.selected_button == "import image":
                     import_image(self.canvas_manager.canvas, self.error_manager, self.canvas_manager.resize_canvas)
+                    self.menu_manager.selected_button = "pencil"
+                elif self.menu_manager.selected_button == "import project file":
+                    import_project(self.canvas_manager.canvas, self.color_palette_manager, self.error_manager, self.frame_manager)
+                    self.menu_manager.selected_button = "pencil"
+                elif self.menu_manager.selected_button == "save whole project":
+                    save_project(self.canvas_manager.canvas, self.color_palette_manager, self.error_manager)
                     self.menu_manager.selected_button = "pencil"
                 if self.menu_manager.selected_button in ['flip horizontally', 'flip vertically', 'rotate left 90 degree',
                                 'rotate right 90 degree']:
