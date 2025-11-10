@@ -109,7 +109,7 @@ class FrameManager:
         self.button_surface = pygame.Surface(self.button_surface_size)
         self.border = 1
 
-        self.menu_buttons = ['play animation', 'pause animation', 'add new frame', 'add new layer']
+        self.menu_buttons = ['play animation', 'pause animation', 'add new frame', 'add new layer', 'delete frames']
         self.tooltip_offset = [self.button_surface_size[0], 0]
         self.menu_manager = MenuManager(self.button_surface, self.button_surface_pos, self.display,
                                         self.menu_buttons, self.tooltip_offset)
@@ -251,6 +251,10 @@ class FrameManager:
             self.menu_manager.selected_button = None
         elif self.menu_manager.selected_button == "add new frame":
             self.canvas.image[self.canvas.selected_layer].add_frame()
+            self.menu_manager.selected_button = None
+            self.add_layer_rect()
+        elif self.menu_manager.selected_button == "delete frames":
+            self.canvas.image[self.canvas.selected_layer].delete_frames()
             self.menu_manager.selected_button = None
             self.add_layer_rect()
         elif self.menu_manager.selected_button == "play animation":

@@ -1,4 +1,3 @@
-
 import pygame
 
 from tkinter import colorchooser
@@ -25,7 +24,6 @@ pygame.init()
 
 class Game:
     def __init__(self):
-        # self.size = [1300, 800]
         self.MIN_SCREEN_SIZE = [800, 500]
         self.color_palette_manager = None
         self.menu_manager = None

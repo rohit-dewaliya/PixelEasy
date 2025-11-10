@@ -25,7 +25,6 @@ def flood_fill(surface, position, fill_color):
                 continue
 
             surf_array[x, y] = fill_color_int
-
             frontier.extend([(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)])
 
     pygame.surfarray.blit_array(surface, surf_array)
@@ -75,6 +74,7 @@ class CanvasManager:
         self.preview = None
         self.canvas_selection = False
         self.selection_rect = None
+        self.original_rect = None
         self.selected_surface = None
 
         self.options_surface_pos = [10, 10]
@@ -82,10 +82,6 @@ class CanvasManager:
         self.slider_size = [120, 10]
         self.draw_size = 1
         self.draw_size_selection = True
-
-        self.rotate_angle = 0
-        self.rotate_angle_selection = False
-
 
         self.options_surface_size = [200, self.slider_size[1] + 30]
         self.options_surface = pygame.Surface(self.options_surface_size)
@@ -255,9 +251,11 @@ class CanvasManager:
                     elif selected == "rotate left 90 degree":
                         self.canvas_operations["rotate selection left"] = True
                         self.canvas_operations["fill paint"] = False
+                        #frame.surface.fill((0, 0, 0, 0), self.original_rect)
                     elif selected == "rotate right 90 degree":
                         self.canvas_operations["rotate selection right"] = True
                         self.canvas_operations["fill paint"] = False
+                        #frame.surface.fill((0, 0, 0, 0), self.original_rect)
 
                 elif event.button == 3:
                     self.canvas_operations["eraser"] = True
@@ -281,8 +279,10 @@ class CanvasManager:
                         pygame.draw.ellipse(frame.surface, color, rect, self.draw_size)
                     if self.canvas_operations["selection"]:
                         self.canvas_selection = True
-                        self.selection_rect = pygame.Rect(self.drawing_fixed_pos,
-                                           (x - self.drawing_fixed_pos[0], y - self.drawing_fixed_pos[1]))
+                        self.selection_rect = pygame.Rect(self.drawing_fixed_pos, (x - self.drawing_fixed_pos[0],
+                                                                                   y - self.drawing_fixed_pos[1]))
+                        self.original_rect = self.selection_rect.copy()
+                        frame.surface.fill((0, 0, 0, 0), self.selection_rect)
 
 
                     self.canvas_operations["pencil"] = False
@@ -338,16 +338,18 @@ class CanvasManager:
                 frame.surface.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
                 self.canvas_operations["flip vertically"] = False
             elif self.canvas_operations["rotate selection left"]:
-                selected_surface = frame.surface.subsurface(self.selection_rect).copy()
+                (print('hi,,, ', self.selection_rect.x, self.selection_rect.y, self.selection_rect.width,
+                 self.selection_rect.height))
+                selected_surface = self.preview.surface.subsurface(self.selection_rect).copy()
                 flipped_surface = pygame.transform.rotate(selected_surface, 90)
                 frame.surface.fill((0, 0, 0, 0), self.selection_rect)
                 self.selection_rect = rotate_rect_90_from_center(self.selection_rect)
-                frame.surface.blit(flipped_surface, (self.selection_rect.x,  self.selection_rect.y))
+                self.preview.surface.blit(flipped_surface, (self.selection_rect.x,  self.selection_rect.y))
                 self.canvas_operations["rotate selection left"] = False
             elif self.canvas_operations["rotate selection right"]:
                 selected_surface = frame.surface.subsurface(self.selection_rect).copy()
                 flipped_surface = pygame.transform.rotate(selected_surface, -90)
-                frame.surface.fill((0, 0, 0, 0), self.selection_rect)
+                # frame.surface.fill((0, 0, 0, 0), self.selection_rect)
                 self.selection_rect = rotate_rect_90_from_center(self.selection_rect)
                 frame.surface.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
                 self.canvas_operations["rotate selection right"] = False
@@ -356,10 +358,6 @@ class CanvasManager:
         if self.preview is not None:
             self.set_scaling_cursor([x, y])
             self.surface.blit(self.preview, (0, 0))
-
-        if self.draw_size_selection:
-            self.draw_size_slider.draw(self.options_surface, (0, 0))
-
 
     def display_surface(self, selected, color, mouse_pos, events = None):
         self.surface.fill(self.surface_color)
@@ -376,9 +374,6 @@ class CanvasManager:
             self.selection_rect.normalize()
             pygame.draw.rect(self.surface, (255, 0, 255, 100), self.selection_rect, 1)
 
-        self.display.blit(pygame.transform.scale(self.options_surface, [self.options_surface_size[0],
-                                               self.options_surface_size[1]]), self.options_surface_pos)
-        pygame.draw.rect(self.display, (255, 255, 255), (*self.options_surface_pos, *self.options_surface_size), 1)
 
         self.display.blit(pygame.transform.scale(self.surface, [self.surface_size[0] * self.scale, self.surface_size[
             1] * self.scale]), self.surface_pos)
@@ -389,3 +384,9 @@ class CanvasManager:
         if self.surface_rect.collidepoint(mouse_pos):
             self.zoom_in_and_out(mouse_pos, events)
             self.show_mouse_pos(mouse_pos)
+
+        if self.draw_size_selection:
+            self.draw_size_slider.draw(self.options_surface, (0, 0))
+        self.display.blit(pygame.transform.scale(self.options_surface, [self.options_surface_size[0],
+                                               self.options_surface_size[1]]), self.options_surface_pos)
+        pygame.draw.rect(self.display, (255, 255, 255), (*self.options_surface_pos, *self.options_surface_size), 1)

@@ -62,8 +62,18 @@ class Layer:
             instance.frames.append(frame)
             instance.selected_frame = instance.total_frames - 1
 
+    @classmethod
+    def delete_frames_to_all_layers(cls):
+        for instance in cls.instances:
+            instance.remove_frames(instance.selected_frame)
+            instance.selected_frame = instance.total_frames - 1
+
     def add_frame(self, frame=None):
         Layer.add_frames_to_all_layers()
+        self.selected_frame = self.total_frames - 1
+
+    def delete_frames(self, frame=None):
+        Layer.delete_frames_to_all_layers()
         self.selected_frame = self.total_frames - 1
 
     def remove_frames(self, frame_index):

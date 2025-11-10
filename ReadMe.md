@@ -4,7 +4,10 @@ PixelEase is a lightweight pixel art editor built with **Python** and **Pygame**
 It provides simple yet powerful tools to create, edit, and manage pixel art projects with ease.
 
 ---
+## Images
+![img.png](img.png)
 
+---
 ## ✨ Features
 - 🖌️ **Drawing Tools** – Pencil, Eraser, Line, Rectangle, Fill paint.
 - 🔄 **Transformations** – Rotate, Flip horizontally, Flip vertically, Selection & Move.
