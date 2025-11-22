@@ -1,7 +1,5 @@
 import pygame
 
-from tkinter import filedialog
-
 
 class Frame:
     def __init__(self, surface_size):
@@ -99,7 +97,7 @@ class Layer:
 class Canvas:
     def __init__(self, surface_size):
         self.surface_size = surface_size
-        self.image = [Layer(self.surface_size, "main")]
+        self.image = [Layer(self.surface_size, "Main")]
         self.selected_layer = 0
         self.frame_speed = 0
         self.selected_frame = 0
