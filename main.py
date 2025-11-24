@@ -346,7 +346,7 @@ class Game:
                     save_project(self.canvas_manager.canvas, self.color_palette_manager, self.error_manager)
                     self.menu_manager.selected_button = "pencil"
                 if self.menu_manager.selected_button in ['flip horizontally', 'flip vertically', 'rotate left 90 degree',
-                                'rotate right 90 degree']:
+                                'rotate right 90 degree', 'move']:
                     if not self.canvas_manager.selection_rect:
                         message = f"Select the area before {self.menu_manager.selected_button}"
                         self.error_manager.add_error(message)

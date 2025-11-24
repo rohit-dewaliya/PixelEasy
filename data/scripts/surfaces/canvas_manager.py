@@ -180,6 +180,10 @@ class CanvasManager:
                     self.selection_rect.x += dx
                     self.selection_rect.y += dy
 
+                    # selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
+                    # self.selection_preview.fill((0, 0, 0, 0))
+                    # self.selection_preview.blit(selected_surface, (self.selection_rect.x, self.selection_rect.y))
+
                     self.fixed_pos = mouse_pos
 
     def set_scaling_cursor(self, pos):
@@ -219,7 +223,7 @@ class CanvasManager:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if self.selection_preview and selected not in ['rotate left 90 degree', 'rotate right 90 degree',
-                                                                   'move']:
+                                                                   'move', 'flip vertically', 'flip horizontally']:
                         frame.surface.blit(self.selection_preview, (0, 0))
                         self.selection_preview = None
                         self.draw_size_selection = True
@@ -398,7 +402,7 @@ class CanvasManager:
             elif self.canvas_operations["move selection"]:
                 selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
                 self.selection_preview.fill((0, 0, 0, 0))
-                self.selection_preview.blit(selected_surface, (self.selection_rect.x, self.selection_rect.y))
+                self.selection_preview.blit(self.selected_surface, (self.selection_rect.x, self.selection_rect.y))
             selected = 'pencil'
 
         if self.preview is not None:
