@@ -180,10 +180,6 @@ class CanvasManager:
                     self.selection_rect.x += dx
                     self.selection_rect.y += dy
 
-                    # selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
-                    # self.selection_preview.fill((0, 0, 0, 0))
-                    # self.selection_preview.blit(selected_surface, (self.selection_rect.x, self.selection_rect.y))
-
                     self.fixed_pos = mouse_pos
 
     def set_scaling_cursor(self, pos):
@@ -296,6 +292,7 @@ class CanvasManager:
                         #-------------------------------------------------------------------
                     elif selected == "move":
                         self.canvas_operations["move selection"] = True
+                        self.selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
 
                 elif event.button == 3:
                     self.canvas_operations["eraser"] = True
