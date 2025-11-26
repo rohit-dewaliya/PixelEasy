@@ -374,16 +374,16 @@ class CanvasManager:
             pygame.draw.rect(self.preview, (255, 0, 255, 100), rect, 1)
         if self.canvas_selection and self.selection_rect:
             if self.canvas_operations["flip horizontally"]:
-                selected_surface = frame.surface.subsurface(self.selection_rect).copy()
+                selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
+                self.selection_preview.fill((0, 0, 0, 0))
                 flipped_surface = pygame.transform.flip(selected_surface, True, False)
-                frame.surface.fill((0, 0, 0, 0), self.selection_rect)
-                frame.surface.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
+                self.selection_preview.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
                 self.canvas_operations["flip horizontally"] = False
             elif self.canvas_operations["flip vertically"]:
-                selected_surface = frame.surface.subsurface(self.selection_rect).copy()
+                selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
+                self.selection_preview.fill((0, 0, 0, 0))
                 flipped_surface = pygame.transform.flip(selected_surface, False, True)
-                frame.surface.fill((0, 0, 0, 0), self.selection_rect)
-                frame.surface.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
+                self.selection_preview.blit(flipped_surface, (self.selection_rect.x, self.selection_rect.y))
                 self.canvas_operations["flip vertically"] = False
             elif self.canvas_operations["rotate selection left"]:
                 selected_surface = self.selection_preview.subsurface(self.selection_rect).copy()
