@@ -37,7 +37,7 @@ It provides simple yet powerful tools to create, edit, and manage pixel art proj
     ```
 2. Install dependencies:
 ```
-pip install -r requirements.txt
+pip install pygame
 ```
 3. Run the program:
 ```
