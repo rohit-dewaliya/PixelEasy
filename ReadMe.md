@@ -16,7 +16,9 @@ It provides simple yet powerful tools to create, edit, and manage pixel art proj
 - 💾 **Project Management** – Save & Load pixel art projects.
 - ⚙️ **Settings & Customization** – Adjust brush size, background, and more.
 ---
-## 📸 Screenshots
+## 📸 Future Modifications
+1. Copy and Paste Functionality
+2. Add more brushes for versality
 
 ---
 
